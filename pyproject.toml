@@ -1,0 +1,88 @@
+[build-system]
+requires = ["flit_core >=2,<3"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "sherpa_streamlit"
+author = "Olivier Terrier"
+author-email = "oterrier@gmail.com"
+home-page = "https://github.com/oterrier/sherpa_streamlit/"
+requires-python=">=3.7"
+description-file="README.md"
+keywords = ""
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.7",
+]
+requires = [
+    "pandas==1.2.3",
+    "openpyxl==3.0.7",
+    "streamlit~=1.2.0",
+    "st-annotated-text",
+    "requests",
+    "plac==0.9.6",
+    "collections-extended>=1.0.2",
+    "python-multipart",
+    "Pillow",
+    "plac"
+]
+dist-name = "sherpa-streamlit"
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-flake8",
+    "types-requests",
+    "flake8==3.9.2",
+    "pytest-mypy",
+    "pytest-black",
+    "tox",
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "m2r2",  # markdown support
+    "sphinxcontrib.apidoc",  # run sphinx-apidoc when building docs
+    "jupyter_sphinx",   # for execution of code snippets in the documentation
+]
+dev = [
+    "flit",
+    "pre-commit",
+    "bump2version",
+]
+
+[tool.flakehell]
+exclude = ["README.md"]
+format = "colored"
+#format = "junit-xml"
+max_line_length = 120
+show_source = true
+#whitelist = "../../allowlist.txt"
+
+[tool.flakehell.plugins]
+flake8-bandit = ["+*", "-S322"]
+flake8-bugbear = ["+*"]
+flake8-builtins = ["+*"]
+flake8-comprehensions = ["+*"]
+#flake8-darglint = ["+*"]
+flake8-docstrings = ["+*"]
+flake8-eradicate = ["+*"]
+flake8-isort = ["+*"]
+flake8-mutable = ["+*"]
+flake8-pytest-style = ["+*"]
+flake8-spellcheck = ["+*"]
+mccabe = ["+*"]
+pep8-naming = ["+*"]
+pycodestyle = ["+*"]
+pyflakes = ["+*"]
+pylint = ["+*"]
