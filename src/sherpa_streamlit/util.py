@@ -225,12 +225,12 @@ def get_html(html: str):
 
 
 def clean_annotation(body, label="", background="#ddd", color="#333", **style):
-    return annotation(clean_html(body), label, background, color, style)
+    return annotation(clean_html(body), label, background, color, **style)
 
 
 def clean_html(html: str):
     soup = BeautifulSoup(html, 'html.parser')
-    return soup.get_text().replace("\n", "<br/>")
+    return soup.get_text()
 
 
 LOGO = get_logo()

@@ -220,6 +220,7 @@ def visualize_annotated_doc(
         annotated = [text]
 
     html = annotated_text(*annotated)
+    html = html.replace("\n", "<br/>")
     st.write(html, unsafe_allow_html=True)
     #
     # if show_table:
