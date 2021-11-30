@@ -8,7 +8,7 @@ from annotated_text import div, annotation
 from collections_extended import RangeMap
 from htbuilder import HtmlElement
 from streamlit.uploaded_file_manager import UploadedFile
-
+import streamlit.components.v1 as components
 # fmt: off
 from .util import get_token, get_projects, get_project_by_label, get_project, get_annotators, get_annotator_by_label, \
     has_converter, has_formatter, annotate_text, annotate_format_text, \
@@ -117,13 +117,13 @@ def visualize(  # noqa: C901
                     with col1:
                         with st.form('File1'):
                             st.file_uploader(file_msg, key="file_to_analyze", accept_multiple_files=False)
-                            submittedf1 = st.form_submit_button('Submit File 1')
+                            submittedf1 = st.form_submit_button('Process File')
                             if submittedf1:
                                 uploaded_file = st.session_state.get("file_to_analyze", None)
                     with col2:
                         with st.form('Text2'):
                             st.text_area(text_msg, default_text, max_chars=10000, key="text_to_analyze")
-                            submittedt2 = st.form_submit_button('Submit Text 2')
+                            submittedt2 = st.form_submit_button('Process Text')
                             if submittedt2:
                                 text = st.session_state.get("text_to_analyze", None)
                 else:
@@ -132,13 +132,13 @@ def visualize(  # noqa: C901
                     with col1:
                         with st.form('Text1'):
                             st.text_area(text_msg, default_text, max_chars=10000, key="text_to_analyze")
-                            submittedt1 = st.form_submit_button('Submit Text 1')
+                            submittedt1 = st.form_submit_button('Process Text')
                             if submittedt1:
                                 text = st.session_state.get("text_to_analyze", None)
                     with col2:
                         with st.form('File2'):
                             st.file_uploader(file_msg, key="file_to_analyze", accept_multiple_files=False)
-                            submittedf2 = st.form_submit_button('Submit File 2')
+                            submittedf2 = st.form_submit_button('Process File')
                             if submittedf2:
                                 uploaded_file = st.session_state.get("file_to_analyze", None)
 
@@ -253,8 +253,9 @@ def visualize_annotated_doc(
         annotated = [text]
 
     html = annotated_text(*annotated)
-    html = html.replace("\n", "<br/>")
-    st.write(html, unsafe_allow_html=True)
+    # html = html.replace("\n", "<br/>")
+    components.html(html, width=800, height=800, scrolling=True)
+    # st.write(html, unsafe_allow_html=True)
 
 
 def annotated_text(*args):
