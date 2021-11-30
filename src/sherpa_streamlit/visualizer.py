@@ -12,7 +12,7 @@ from streamlit.uploaded_file_manager import UploadedFile
 # fmt: off
 from .util import get_token, get_projects, get_project_by_label, get_project, get_annotators, get_annotator_by_label, \
     has_converter, has_formatter, annotate_text, annotate_format_text, \
-    annotate_binary, annotate_format_binary, LOGO
+    annotate_binary, annotate_format_binary, LOGO, clean_html, clean_annotation
 
 # fmt: on
 FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](https://streamlit.io/) and largerly inspired by the great [`spacy-streamlit`](https://github.com/explosion/spacy-streamlit)</span>"""
@@ -193,8 +193,8 @@ def visualize_annotated_doc(
         for cat in categories:
             score = cat.get('score', 1.0)
             color = labels.get(cat['labelName'], {}).get('color', "#333")
-            categorized.append((cat['label'], "{:.0%}".format(score), color))
-            categorized.append((" ", "", ""))
+            categorized.append(clean_annotation(cat['label'], "{:.0%}".format(score), color))
+            categorized.append(" ")
 
         html = annotated_text(*categorized)
         st.write(html, unsafe_allow_html=True)
@@ -209,18 +209,17 @@ def visualize_annotated_doc(
         annotated = []
         for r in annotation_map.ranges():
             if r.start > start:
-                annotated.append(text[start:r.start])
+                annotated.append(clean_html(text[start:r.start]))
             a = r.value
             color = labels.get(a['labelName'], {}).get('color', "#333")
-            annotated.append((text[r.start:r.stop], a['labelName'], color))
+            annotated.append(clean_annotation(text[r.start:r.stop], clean_html(a['label']), color))
             start = r.stop
         if start < len(text):
-            annotated.append(text[start:])
+            annotated.append(clean_html(text[start:]))
     else:
         annotated = [text]
 
     html = annotated_text(*annotated)
-    html = html.replace("\n\n", "\n")
     st.write(html, unsafe_allow_html=True)
     #
     # if show_table:

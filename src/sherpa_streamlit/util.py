@@ -3,6 +3,8 @@ from typing import Tuple
 import requests
 import streamlit as st
 from PIL import Image
+from annotated_text import annotation
+from bs4 import BeautifulSoup
 from multipart.multipart import parse_options_header
 from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
 
@@ -220,6 +222,15 @@ def get_html(html: str):
     # Newlines seem to mess with the rendering
     html = html.replace("\n", " ")
     return WRAPPER.format(html)
+
+
+def clean_annotation(body, label="", background="#ddd", color="#333", **style):
+    return annotation(clean_html(body), label, background, color, style)
+
+
+def clean_html(html: str):
+    soup = BeautifulSoup(html, 'html.parser')
+    return soup.get_text().replace("\n", "<br/>")
 
 
 LOGO = get_logo()
