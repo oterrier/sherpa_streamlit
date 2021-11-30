@@ -3,19 +3,17 @@ from typing import Tuple
 import requests
 import streamlit as st
 from PIL import Image
-from annotated_text import annotation, span
+from annotated_text import span
 from bs4 import BeautifulSoup
 from multipart.multipart import parse_options_header
 from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
 import html
 
-from htbuilder import H, HtmlElement, styles
+from htbuilder import H, styles
 from htbuilder.units import unit
 
 # Only works in 3.7+: from htbuilder import div, span
 div = H.div
-span = H.span
-
 # Only works in 3.7+: from htbuilder.units import px, rem, em
 px = unit.px
 rem = unit.rem
@@ -290,7 +288,6 @@ def clean_annotation(body, label="", background="#ddd", color="#333", **style):
     )(
         html.escape(body),
     )
-
 
 
 def clean_html(html: str):
