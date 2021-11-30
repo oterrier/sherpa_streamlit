@@ -119,12 +119,12 @@ def get_annotator_by_label(server: str, project: str, annotator_types: Tuple[str
 
 
 def has_converter(ann):
-    result = 'converter' in ann['parameters'] if ann['type'] == 'plan' else False
+    result = ann['parameters'].get('converter', None) if ann['type'] == 'plan' else None
     return result
 
 
 def has_formatter(ann):
-    result = 'formatter' in ann['parameters'] if ann['type'] == 'plan' else False
+    result = ann['parameters'].get('formatter', None) if ann['type'] == 'plan' else False
     return result
 
 

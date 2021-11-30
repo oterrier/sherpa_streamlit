@@ -95,24 +95,56 @@ def visualize(  # noqa: C901
                                                        st.session_state.annotator, st.session_state.token)
 
             if show_project or show_annotator:
-                col1, col2, = st.columns(2)
+                colp, cola, = st.columns(2)
                 if project is not None and show_project:
-                    with col1:
+                    with colp:
                         project_exp = st.expander("Project definition (json)")
                         project_exp.json(get_project(url, project, st.session_state.token))
                     if annotator is not None and show_annotator:
-                        with col2:
+                        with cola:
                             annotator_exp = st.expander("Annotator definition (json)")
                             annotator_exp.json(annotator)
 
             if project is not None and annotator is not None:
                 doc = None
+                text = None
+                uploaded_file = None
                 result = None
+                col1, col2, = st.columns(2)
                 if has_converter(annotator):
-                    uploaded_file = st.file_uploader("File to analyze", key="file_to_analyze",
-                                                     accept_multiple_files=False)
-                    if uploaded_file is not None:
-                        uploaded_file = cast(UploadedFile, uploaded_file)
+                    file_msg = f"Upload binary file ({has_converter(annotator)['name']}) to analyze"
+                    text_msg = "Or input text to analyze"
+                    with col1:
+                        with st.form('File1'):
+                            st.file_uploader(file_msg, key="file_to_analyze", accept_multiple_files=False)
+                            submittedf1 = st.form_submit_button('Submit File 1')
+                            if submittedf1:
+                                uploaded_file = st.session_state.get("file_to_analyze", None)
+                    with col2:
+                        with st.form('Text2'):
+                            st.text_area(text_msg, default_text, max_chars=10000, key="text_to_analyze")
+                            submittedt2 = st.form_submit_button('Submit Text 2')
+                            if submittedt2:
+                                text = st.session_state.get("text_to_analyze", None)
+                else:
+                    text_msg = "Input text to analyze"
+                    file_msg = "Or upload text file to analyze"
+                    with col1:
+                        with st.form('Text1'):
+                            st.text_area(text_msg, default_text, max_chars=10000, key="text_to_analyze")
+                            submittedt1 = st.form_submit_button('Submit Text 1')
+                            if submittedt1:
+                                text = st.session_state.get("text_to_analyze", None)
+                    with col2:
+                        with st.form('File2'):
+                            st.file_uploader(file_msg, key="file_to_analyze", accept_multiple_files=False)
+                            submittedf2 = st.form_submit_button('Submit File 2')
+                            if submittedf2:
+                                uploaded_file = st.session_state.get("file_to_analyze", None)
+
+                if uploaded_file is not None:
+                    uploaded_file = cast(UploadedFile, uploaded_file)
+                    if has_converter(annotator):
                         if uploaded_file.type.startswith('audio'):
                             st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
                         elif uploaded_file.type.startswith('video'):
@@ -125,13 +157,14 @@ def visualize(  # noqa: C901
                             docs = annotate_binary(url, project, annotator['name'], uploaded_file,
                                                    st.session_state.token)
                             doc = docs[0] if docs is not None else None
-                else:
-                    st.text_area("Text to analyze", default_text, max_chars=10000, key="text_to_analyze")
+                    else:
+                        text = uploaded_file.getvalue().decode("utf-8")
+                if text is not None:
                     if has_formatter(annotator):
-                        result = annotate_format_text(url, project, annotator['name'], st.session_state.text_to_analyze,
+                        result = annotate_format_text(url, project, annotator['name'], text,
                                                       st.session_state.token)
                     else:
-                        doc = annotate_text(url, project, annotator['name'], st.session_state.text_to_analyze,
+                        doc = annotate_text(url, project, annotator['name'], text,
                                             st.session_state.token)
                 if doc is not None:
                     col1, col2, = st.columns(2)
@@ -222,16 +255,6 @@ def visualize_annotated_doc(
     html = annotated_text(*annotated)
     html = html.replace("\n", "<br/>")
     st.write(html, unsafe_allow_html=True)
-    #
-    # if show_table:
-    #     data = [
-    #         [str(getattr(ent, attr)) for attr in attrs]
-    #         for ent in doc.ents
-    #         if ent.label_ in label_select
-    #     ]
-    #     if data:
-    #         df = pd.DataFrame(data, columns=attrs)
-    #         st.dataframe(df)
 
 
 def annotated_text(*args):
