@@ -3,10 +3,23 @@ from typing import Tuple
 import requests
 import streamlit as st
 from PIL import Image
-from annotated_text import annotation
+from annotated_text import annotation, span
 from bs4 import BeautifulSoup
 from multipart.multipart import parse_options_header
 from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
+import html
+
+from htbuilder import H, HtmlElement, styles
+from htbuilder.units import unit
+
+# Only works in 3.7+: from htbuilder import div, span
+div = H.div
+span = H.span
+
+# Only works in 3.7+: from htbuilder.units import px, rem, em
+px = unit.px
+rem = unit.rem
+em = unit.em
 
 
 # @st.cache(allow_output_mutation=True, suppress_st_warning=True)
@@ -225,7 +238,59 @@ def get_html(html: str):
 
 
 def clean_annotation(body, label="", background="#ddd", color="#333", **style):
-    return annotation(clean_html(body), label, background, color, **style)
+    """Build an HtmlElement span object with the given body and annotation label.
+
+    The end result will look something like this:
+
+        [body | label]
+
+    Parameters
+    ----------
+    body : string
+        The string to put in the "body" part of the annotation.
+    label : string
+        The string to put in the "label" part of the annotation.
+    background : string
+        The color to use for the background "chip" containing this annotation.
+    color : string
+        The color to use for the body and label text.
+    **style : dict
+        Any CSS you want to use to customize the containing "chip".
+
+    Examples
+    --------
+
+    Produce a simple annotation with default colors:
+
+    >>> annotation("apple", "fruit")
+
+    Produce an annotation with custom colors:
+
+    >>> annotation("apple", "fruit", background="#FF0", color="black")
+
+    Produce an annotation with crazy CSS:
+
+    >>> annotation("apple", "fruit", background="#FF0", border="1px dashed red")
+
+    """
+
+    return span(
+        style=styles(
+            border_style='solid',
+            border_color=background,
+            border_radius=rem(0.33),
+            color=color,
+            padding=(0, rem(0.67)),
+            # border_radius=em(0.3),
+            # padding=(em(0.5), em(0.1)),
+            white_space="normal",
+            **style,
+        ),
+        title=label
+    )(
+        html.escape(body),
+    )
+
 
 
 def clean_html(html: str):

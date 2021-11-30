@@ -226,7 +226,7 @@ def visualize_annotated_doc(
         for cat in categories:
             score = cat.get('score', 1.0)
             color = labels.get(cat['labelName'], {}).get('color', "#333")
-            categorized.append(clean_annotation(cat['label'], "{:.0%}".format(score), color))
+            categorized.append(annotation(cat['label'], "{:.0%}".format(score), color))
             categorized.append(" ")
 
         html = annotated_text(*categorized)
