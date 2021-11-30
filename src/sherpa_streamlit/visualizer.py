@@ -24,8 +24,9 @@ def visualize(  # noqa: C901
         annotators: List[str] = None,
         annotator_types: Iterable[str] = None,
         favorite_only: bool = False,
-        show_project: bool = True,
-        show_annotator: bool = True,
+        show_project: bool = False,
+        show_annotator: bool = False,
+        show_json: bool = False,
         sidebar_title: Optional[str] = None,
         sidebar_description: Optional[str] = None,
         show_logo: bool = True,
@@ -170,9 +171,10 @@ def visualize(  # noqa: C901
                     col1, col2, = st.columns(2)
                     with col1:
                         st.success('Annotation successful!')
-                    with col2:
-                        doc_exp = st.expander("Annotated doc (json)")
-                    doc_exp.json(doc)
+                    if show_json:
+                        with col2:
+                            doc_exp = st.expander("Annotated doc (json)")
+                            doc_exp.json(doc)
                     visualize_annotated_doc(doc, annotator)
                 if result is not None:
                     col1, col2, = st.columns(2)
