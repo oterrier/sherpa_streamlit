@@ -3,13 +3,13 @@ from typing import Tuple
 import requests
 import streamlit as st
 from PIL import Image
-from annotated_text import span
+from annotated_text import span, annotation
 from bs4 import BeautifulSoup
 from multipart.multipart import parse_options_header
 from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
 import html
 
-from htbuilder import H, styles
+from htbuilder import H, styles, HtmlElement
 from htbuilder.units import unit
 
 # Only works in 3.7+: from htbuilder import div, span
@@ -229,7 +229,7 @@ def get_logo():
 
 def get_html(html: str):
     """Convert HTML so it can be rendered."""
-    WRAPPER = """<div style="overflow-x: auto; border: 1px solid #e6e9ef; border-radius: 0.25rem; padding: 1rem; margin-bottom: 2.5rem">{}</div>"""
+    WRAPPER = """<div style="line-height: 1.75rem; letter-spacing: 0em; overflow-x: auto; border: 1px solid #e6e9ef; border-radius: 0.25rem; padding: 1rem; margin-bottom: 2.5rem">{}</div>"""
     # Newlines seem to mess with the rendering
     html = html.replace("\n", " ")
     return WRAPPER.format(html)
@@ -288,6 +288,75 @@ def clean_annotation(body, label="", background="#ddd", color="#333", **style):
     )(
         html.escape(body),
     )
+
+
+def annotated_text(*args):
+    """Writes test with annotations into your Streamlit app.
+
+    Parameters
+    ----------
+    *args : str, tuple or htbuilder.HtmlElement
+        Arguments can be:
+        - strings, to draw the string as-is on the screen.
+        - tuples of the form (main_text, annotation_text, background, color) where
+          background and foreground colors are optional and should be an CSS-valid string such as
+          "#aabbcc" or "rgb(10, 20, 30)"
+        - HtmlElement objects in case you want to customize the annotations further. In particular,
+          you can import the `annotation()` function from this module to easily produce annotations
+          whose CSS you can customize via keyword arguments.
+
+    Examples
+    --------
+
+    >>> annotated_text(
+    ...     "This ",
+    ...     ("is", "verb", "#8ef"),
+    ...     " some ",
+    ...     ("annotated", "adj", "#faa"),
+    ...     ("text", "noun", "#afa"),
+    ...     " for those of ",
+    ...     ("you", "pronoun", "#fea"),
+    ...     " who ",
+    ...     ("like", "verb", "#8ef"),
+    ...     " this sort of ",
+    ...     ("thing", "noun", "#afa"),
+    ... )
+
+    >>> annotated_text(
+    ...     "Hello ",
+    ...     annotation("world!", "noun", color="#8ef", border="1px dashed red"),
+    ... )
+
+    """
+    out = div(
+        style=styles(
+            line_height=rem(1.75),
+            letter_spacing=em(0),
+            white_space="pre-wrap",
+            overflow_x='auto',
+            border=px(1),
+            border_color="#e6e9ef",
+            border_style='solid',
+            border_radius=rem(0.25),
+            padding=rem(1.0),
+            margin_bottom=rem(2.5)
+        ))
+    # style="line-height: 1.75rem; letter-spacing: 0em; white-space: pre-wrap; overflow-x: auto; border: 1px solid #e6e9ef; border-radius: 0.25rem; padding: 1rem; margin-bottom: 2.5rem")
+
+    for arg in args:
+        if isinstance(arg, str):
+            out(html.escape(arg))
+
+        elif isinstance(arg, HtmlElement):
+            out(arg)
+
+        elif isinstance(arg, tuple):
+            out(annotation(*arg))
+
+        else:
+            raise Exception("Oh noes!")
+
+    return str(out)
 
 
 def clean_html(html: str):

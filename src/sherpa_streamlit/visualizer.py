@@ -1,18 +1,17 @@
-import html
 from typing import List, Optional, Iterable, cast
 
 import pandas as pd
 import plac
 import streamlit as st
-from annotated_text import div, annotation
-from collections_extended import RangeMap
-from htbuilder import HtmlElement
-from streamlit.uploaded_file_manager import UploadedFile
 import streamlit.components.v1 as components
+from annotated_text import annotation
+from collections_extended import RangeMap
+from streamlit.uploaded_file_manager import UploadedFile
+
 # fmt: off
 from .util import get_token, get_projects, get_project_by_label, get_project, get_annotators, get_annotator_by_label, \
     has_converter, has_formatter, annotate_text, annotate_format_text, \
-    annotate_binary, annotate_format_binary, LOGO, clean_html, clean_annotation
+    annotate_binary, annotate_format_binary, LOGO, clean_html, clean_annotation, annotated_text
 
 # fmt: on
 FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](https://streamlit.io/) and largerly inspired by the great [`spacy-streamlit`](https://github.com/explosion/spacy-streamlit)</span>"""
@@ -121,6 +120,11 @@ def visualize(  # noqa: C901
                             submittedf1 = st.form_submit_button('Process File')
                             if submittedf1:
                                 uploaded_file = st.session_state.get("file_to_analyze", None)
+                                if uploaded_file.type.startswith('audio'):
+                                    st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
+                                elif uploaded_file.type.startswith('video'):
+                                    st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
+                                    # st.video(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
                     with col2:
                         with st.form('Text2'):
                             st.text_area(text_msg, default_text, max_chars=10000, key="text_to_analyze")
@@ -146,11 +150,6 @@ def visualize(  # noqa: C901
                 if uploaded_file is not None:
                     uploaded_file = cast(UploadedFile, uploaded_file)
                     if has_converter(annotator):
-                        if uploaded_file.type.startswith('audio'):
-                            st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
-                        elif uploaded_file.type.startswith('video'):
-                            st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
-                            # st.video(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
                         if has_formatter(annotator):
                             result = annotate_format_binary(url, project, annotator['name'], uploaded_file,
                                                             st.session_state.token)
@@ -258,63 +257,6 @@ def visualize_annotated_doc(
     # html = html.replace("\n", "<br/>")
     components.html(html, width=800, height=800, scrolling=True)
     # st.write(html, unsafe_allow_html=True)
-
-
-def annotated_text(*args):
-    """Writes test with annotations into your Streamlit app.
-
-    Parameters
-    ----------
-    *args : str, tuple or htbuilder.HtmlElement
-        Arguments can be:
-        - strings, to draw the string as-is on the screen.
-        - tuples of the form (main_text, annotation_text, background, color) where
-          background and foreground colors are optional and should be an CSS-valid string such as
-          "#aabbcc" or "rgb(10, 20, 30)"
-        - HtmlElement objects in case you want to customize the annotations further. In particular,
-          you can import the `annotation()` function from this module to easily produce annotations
-          whose CSS you can customize via keyword arguments.
-
-    Examples
-    --------
-
-    >>> annotated_text(
-    ...     "This ",
-    ...     ("is", "verb", "#8ef"),
-    ...     " some ",
-    ...     ("annotated", "adj", "#faa"),
-    ...     ("text", "noun", "#afa"),
-    ...     " for those of ",
-    ...     ("you", "pronoun", "#fea"),
-    ...     " who ",
-    ...     ("like", "verb", "#8ef"),
-    ...     " this sort of ",
-    ...     ("thing", "noun", "#afa"),
-    ... )
-
-    >>> annotated_text(
-    ...     "Hello ",
-    ...     annotation("world!", "noun", color="#8ef", border="1px dashed red"),
-    ... )
-
-    """
-    out = div(
-        style="white-space: pre-wrap; overflow-x: auto; border: 1px solid #e6e9ef; border-radius: 0.25rem; padding: 1rem; margin-bottom: 2.5rem")
-
-    for arg in args:
-        if isinstance(arg, str):
-            out(html.escape(arg))
-
-        elif isinstance(arg, HtmlElement):
-            out(arg)
-
-        elif isinstance(arg, tuple):
-            out(annotation(*arg))
-
-        else:
-            raise Exception("Oh noes!")
-
-    return str(out)
 
 
 def main():
