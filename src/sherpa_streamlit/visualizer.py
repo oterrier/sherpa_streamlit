@@ -74,7 +74,7 @@ def visualize(  # noqa: C901
                 if submit_button:
                     st.session_state['token'] = get_token(url_input, name_input, pwd_input)
         else:
-            url_input = st.secrets.sherpa_credentials.url
+            url_input = st.secrets.sherpa_credentials.get('url', "https://sherpa-sandbox.kairntech.com/")
             name_input = st.secrets.sherpa_credentials.username
             pwd_input = st.secrets.sherpa_credentials.password
             st.session_state['token'] = get_token(url_input, name_input, pwd_input)
