@@ -67,6 +67,21 @@ def get_project(server: str, name: str, token: str):
 
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
+def get_sample_doc(server: str, project: str, token: str):
+    doc = None
+    url = f"{server}/api/projects/{project}/documents/_sample"
+    headers = {'Authorization': 'Bearer ' + token, 'Accept': "application/json"}
+    r = requests.post(url, headers=headers, params={'sampleSize': 1}, verify=False)
+    if r.ok:
+        json_response = r.json()
+        if json_response and isinstance(json_response, Sequence):
+            doc = json_response[0]
+    else:
+        r.raise_for_status()
+    return doc
+
+
+@st.cache(allow_output_mutation=True, suppress_st_warning=True)
 def get_annotators(server: str, project: str, annotator_types: Tuple[str], favorite_only: bool, token: str):
     # st.write("get_annotators(", server, ", ", project, ", ", annotator_types,", ", favorite_only, ")")
     url = f"{server}/api/projects/{project}/annotators_by_type"
