@@ -25,9 +25,12 @@ def visualize(  # noqa: C901
         annotator_types: Iterable[str] = None,
         favorite_only: bool = False,
         sample_doc: bool = True,
+        show_connection: bool = True,
         show_project: bool = False,
         show_annotator: bool = False,
         show_json: bool = False,
+        project_selector_title: str = "Select project",
+        annotator_selector_title: str = "Select annotator",
         sidebar_title: Optional[str] = None,
         sidebar_description: Optional[str] = None,
         show_logo: bool = True,
@@ -62,13 +65,19 @@ def visualize(  # noqa: C901
     # Forms can be declared using the 'with' syntax
 
     try:
-        with st.sidebar.form(key='connect_form'):
-            url_input = st.text_input(label='Sherpa URL', value="https://sherpa-sandbox.kairntech.com/")
-            name_input = st.text_input(label='Name', value="")
-            pwd_input = st.text_input(label='Password', value="", type="password")
-            submit_button = st.form_submit_button(label='Connect')
-            if submit_button:
-                st.session_state['token'] = get_token(url_input, name_input, pwd_input)
+        if show_connection:
+            with st.sidebar.form(key='connect_form'):
+                url_input = st.text_input(label='Sherpa URL', value="https://sherpa-sandbox.kairntech.com/")
+                name_input = st.text_input(label='Name', value="")
+                pwd_input = st.text_input(label='Password', value="", type="password")
+                submit_button = st.form_submit_button(label='Connect')
+                if submit_button:
+                    st.session_state['token'] = get_token(url_input, name_input, pwd_input)
+        else:
+            url_input = st.secrets.sherpa_credentials.url
+            name_input = st.secrets.sherpa_credentials.username
+            pwd_input = st.secrets.sherpa_credentials.password
+            st.session_state['token'] = get_token(url_input, name_input, pwd_input)
     except BaseException as e:
         st.exception(e)
 
@@ -80,7 +89,7 @@ def visualize(  # noqa: C901
         if st.session_state.get('token', None) is not None:
             all_projects = get_projects(url, st.session_state.token)
             selected_projects = sorted([p['label'] for p in all_projects if projects is None or p['name'] in projects])
-            st.sidebar.selectbox('Select project', selected_projects, key="project")
+            st.sidebar.selectbox(project_selector_title, selected_projects, key="project")
             if st.session_state.get('project', None) is not None:
                 project = get_project_by_label(url, st.session_state.project, st.session_state.token)
                 if sample_doc and project is not None:
@@ -92,7 +101,7 @@ def visualize(  # noqa: C901
                                                 st.session_state.token) if project is not None else []
                 selected_annotators = sorted(
                     [p['label'] for p in all_annotators if annotators is None or p['name'] in annotators])
-                st.sidebar.selectbox('Select annotator', selected_annotators, key="annotator")
+                st.sidebar.selectbox(annotator_selector_title, selected_annotators, key="annotator")
                 if st.session_state.get('annotator', None) is not None:
                     annotator = get_annotator_by_label(url, project,
                                                        tuple(annotator_types) if annotator_types is not None else None,
