@@ -1,16 +1,17 @@
+import html
+import json
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Sequence
+
 import requests
 import streamlit as st
 from PIL import Image
 from annotated_text import span, annotation
 from bs4 import BeautifulSoup
-from multipart.multipart import parse_options_header
-from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
-import html
-
 from htbuilder import H, styles, HtmlElement
 from htbuilder.units import unit
+from multipart.multipart import parse_options_header
+from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
 
 # Only works in 3.7+: from htbuilder import div, span
 div = H.div
@@ -207,6 +208,60 @@ def annotate_format_binary(server: str, project: str, annotator: str, datafile: 
         'file': (datafile.name, datafile.getvalue(), datafile.type)
     }
     r = requests.post(url, files=files, headers=headers, verify=False, timeout=1000)
+    if r.ok:
+        data = r.content
+        type = r.headers.get('Content-Type', 'application/octet-stream')
+        filename = "file"
+        if 'Content-Disposition' in r.headers:
+            content_type, content_parameters = parse_options_header(r.headers['Content-Disposition'])
+            if b'filename' in content_parameters:
+                filename = content_parameters[b'filename'].decode("utf-8")
+        return UploadedFile(UploadedFileRec(id=0, name=filename, type=type, data=data))
+    else:
+        r.raise_for_status()
+
+
+def documents_from_file(datafile: UploadedFile):
+    jsondata = json.load(datafile)
+    documents = jsondata if isinstance(jsondata, Sequence) else [jsondata]
+    for document in documents:
+        for kd in list(document.keys()):
+            if kd not in ["identifier", 'title', 'text', 'metadata', 'sentences', 'categories', 'annotations']:
+                del document[kd]
+            for sentence in document.get('sentences', []):
+                for ks in list(sentence.keys()):
+                    if ks not in ["start", 'end']:
+                        del sentence[ks]
+            for category in document.get('categories', []):
+                for kc in list(category.keys()):
+                    if kc not in ["identifier", 'labelName', 'score', "status", "createdDate",
+                                  "modifiedDate", "createdBy"]:
+                        del category[kc]
+            for ann in document.get('annotations', []):
+                for ka in list(ann.keys()):
+                    if ka not in ["start", 'end', "identifier", 'labelName', 'score', "text", "status", "createdDate",
+                                  "modifiedDate", "createdBy"]:
+                        del ann[ka]
+    return documents
+
+
+def annotate_json(server: str, project: str, annotator: str, datafile: UploadedFile, token: str):
+    url = f"{server}/api/projects/{project}/annotators/{annotator}/_annotate_documents"
+    headers = {'Authorization': 'Bearer ' + token, 'Content-Type': "application/json", 'Accept': "application/json"}
+    documents = documents_from_file(datafile)
+    r = requests.post(url, json=documents, headers=headers, verify=False, timeout=1000)
+    if r.ok:
+        docs = r.json()
+        return docs
+    else:
+        r.raise_for_status()
+
+
+def annotate_format_json(server: str, project: str, annotator: str, datafile: UploadedFile, token: str):
+    url = f"{server}/api/projects/{project}/plans/{annotator}/_annotate_format_documents"
+    headers = {'Authorization': 'Bearer ' + token, 'Content-Type': "application/json", 'Accept': "application/json"}
+    documents = documents_from_file(datafile)
+    r = requests.post(url, json=documents, headers=headers, verify=False, timeout=1000)
     if r.ok:
         data = r.content
         type = r.headers.get('Content-Type', 'application/octet-stream')

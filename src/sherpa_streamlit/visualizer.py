@@ -11,7 +11,8 @@ from streamlit.uploaded_file_manager import UploadedFile
 # fmt: off
 from .util import get_token, get_projects, get_project_by_label, get_project, get_annotators, get_annotator_by_label, \
     has_converter, has_formatter, annotate_text, annotate_format_text, \
-    annotate_binary, annotate_format_binary, LOGO, clean_html, clean_annotation, annotated_text
+    annotate_binary, annotate_format_binary, LOGO, clean_html, clean_annotation, annotated_text, annotate_format_json, \
+    annotate_json
 
 # fmt: on
 FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](https://streamlit.io/) and largerly inspired by the great [`spacy-streamlit`](https://github.com/explosion/spacy-streamlit)</span>"""
@@ -133,7 +134,7 @@ def visualize(  # noqa: C901
                                 text = st.session_state.get("text_to_analyze", None)
                 else:
                     text_msg = "Input text to analyze"
-                    file_msg = "Or upload text file to analyze"
+                    file_msg = "Or upload text/json file to analyze"
                     with col1:
                         with st.form('Text1'):
                             st.text_area(text_msg, default_text, max_chars=10000, key="text_to_analyze")
@@ -158,7 +159,16 @@ def visualize(  # noqa: C901
                                                    st.session_state.token)
                             doc = docs[0] if docs is not None else None
                     else:
-                        text = uploaded_file.getvalue().decode("utf-8")
+                        if 'json' in uploaded_file.type:
+                            if has_formatter(annotator):
+                                result = annotate_format_json(url, project, annotator['name'], uploaded_file,
+                                                              st.session_state.token)
+                            else:
+                                docs = annotate_json(url, project, annotator['name'], uploaded_file,
+                                                     st.session_state.token)
+                                doc = docs[0] if docs is not None else None
+                        else:
+                            text = uploaded_file.getvalue().decode("utf-8")
                 if text is not None:
                     if has_formatter(annotator):
                         result = annotate_format_text(url, project, annotator['name'], text,
@@ -166,6 +176,7 @@ def visualize(  # noqa: C901
                     else:
                         doc = annotate_text(url, project, annotator['name'], text,
                                             st.session_state.token)
+
                 if doc is not None:
                     col1, col2, = st.columns(2)
                     with col1:
@@ -225,9 +236,10 @@ def visualize_annotated_doc(
     if categories:
         categorized = []
         for cat in categories:
+            name = cat['labelName']
             score = cat.get('score', 1.0)
-            color = labels.get(cat['labelName'], {}).get('color', "#333")
-            categorized.append(annotation(cat['label'], "{:.0%}".format(score), color))
+            color = labels.get(name, {}).get('color', "#333")
+            categorized.append(annotation(cat.get('label', name), "{:.0%}".format(score), color))
             categorized.append(" ")
 
         html = annotated_text(*categorized)
@@ -245,8 +257,9 @@ def visualize_annotated_doc(
             if r.start > start:
                 annotated.append(clean_html(text[start:r.start]))
             a = r.value
-            color = labels.get(a['labelName'], {}).get('color', "#333")
-            annotated.append(clean_annotation(text[r.start:r.stop], clean_html(a['label']), color))
+            name = a['labelName']
+            color = labels.get(name, {}).get('color', "#333")
+            annotated.append(clean_annotation(text[r.start:r.stop], clean_html(a.get('label', name)), color))
             start = r.stop
         if start < len(text):
             annotated.append(clean_html(text[start:]))
