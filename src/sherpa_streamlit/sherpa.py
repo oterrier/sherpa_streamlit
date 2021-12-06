@@ -38,9 +38,6 @@ class ExtendedAnnotator:
     modified_by: Union[Unset, str] = UNSET
     modified_at: Union[Unset, str] = UNSET
 
-    def __hash__(self):
-        return hash((self.name, self.type))
-
     def to_dict(self) -> Dict[str, Any]:
         name = self.name
         label = self.label
@@ -137,9 +134,6 @@ class StreamlitSherpaClient:
         self.client = SherpaClient(base_url=f"{url}/api", verify_ssl=False, timeout=100)
         self.client.login(Credentials(email=user, password=password),
                           project_access_mode=RequestJwtTokenProjectAccessMode.READ)
-
-    def __hash__(self):
-        return hash(self.client.token)
 
     def get_projects(self) -> List[ProjectBean]:
         r = get_projects.sync_detailed(client=self.client)

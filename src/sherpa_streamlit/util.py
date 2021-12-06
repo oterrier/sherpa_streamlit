@@ -16,19 +16,28 @@ div = H.div
 px = unit.px
 rem = unit.rem
 em = unit.em
+DEBUG = True
 
 
 def ProjectBean_hash(self):
-    return hash(self.name)
+    return self.name
 
 
 def Document_hash(self):
-    return hash(self.text)
+    return self.text
+
+
+def StreamlitSherpaClient_hash(self):
+    return self.client.token
+
+
+def ExtendedAnnotator_hash(self):
+    return (self.name, self.type)
 
 
 HASH_FUNCS = {
-    "sherpa_streamlit.sherpa.StreamlitSherpaClient": hash,
-    "sherpa_streamlit.sherpa.ExtendedAnnotator": hash,
+    "sherpa_streamlit.sherpa.StreamlitSherpaClient": StreamlitSherpaClient_hash,
+    "sherpa_streamlit.sherpa.ExtendedAnnotator": ExtendedAnnotator_hash,
     "sherpa_client.models.ProjectBean": ProjectBean_hash,
     "sherpa_client.models.Document": Document_hash
 }
@@ -36,20 +45,24 @@ HASH_FUNCS = {
 
 @st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_cached_projects(client) -> List[ProjectBean]:
-    # st.write("Cache miss: get_cached_projects(", client, ") ran")
+    if DEBUG:
+        st.write("Cache miss: get_cached_projects(", client, ") ran")
     return client.get_projects()
 
 
 @st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_cached_sample_doc(client, project: str) -> Document:
-    # st.write("Cache miss: get_cached_sample_doc(", client, ",", project, ") ran")
+    if DEBUG:
+        st.write("Cache miss: get_cached_sample_doc(", client, ",", project, ") ran")
     return client.get_sample_doc(project)
 
 
 @st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_cached_annotators(client, project: str, annotator_types: Tuple[str] = None,
                           favorite_only: bool = False):
-    # st.write("Cache miss: get_cached_annotators(", client, ",", project, ",", annotator_types, ",", favorite_only, ") ran")
+    if DEBUG:
+        st.write("Cache miss: get_cached_annotators(", client, ",", project, ",", annotator_types, ",", favorite_only,
+                 ") ran")
     return client.get_annotators(project, annotator_types, favorite_only)
 
 
@@ -57,7 +70,10 @@ def get_cached_annotators(client, project: str, annotator_types: Tuple[str] = No
 def get_cached_annotator_by_label(client, project: str, label: str,
                                   annotator_types: Tuple[str] = None,
                                   favorite_only: bool = False):
-    # st.write("Cache miss: get_cached_annotator_by_label(", client, ",", project, ",", annotator_types, ",", favorite_only, ") ran")
+    if DEBUG:
+        st.write("Cache miss: get_cached_annotator_by_label(", client, ",", project, ",", label, ",",
+                 annotator_types, ",",
+                 favorite_only, ") ran")
     annotators = get_cached_annotators(client, project, annotator_types, favorite_only)
     for ann in annotators:
         if ann.label == label:
@@ -67,7 +83,8 @@ def get_cached_annotator_by_label(client, project: str, label: str,
 
 @st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_cached_project_by_label(client, label: str) -> ProjectBean:
-    # st.write("Cache miss: get_cached_project_by_label(", client, ",", label, ") ran")
+    if DEBUG:
+        st.write("Cache miss: get_cached_project_by_label(", client, ",", label, ") ran")
     projects = get_cached_projects(client)
     for p in projects:
         if p.label == label:

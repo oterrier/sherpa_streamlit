@@ -13,6 +13,8 @@ from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached
     get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label
 from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
 
+DEBUG = True
+
 # fmt: on
 FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](https://streamlit.io/) and [`sherpa-streamlit`](https://github.com/oterrier/sherpa_streamlit)</span>"""
 
@@ -86,13 +88,23 @@ def visualize(  # noqa: C901
     try:
         client = st.session_state.get('client', None)
         if client is not None:
+            if DEBUG:
+                st.write("Calling get_cached_projects(", client, ")")
             all_projects = get_cached_projects(client)
             selected_projects = sorted([p.label for p in all_projects if projects is None or p.name in projects])
             st.sidebar.selectbox(project_selector_title, selected_projects, key="project")
             if st.session_state.get('project', None) is not None:
+                if DEBUG:
+                    st.write("Calling get_cached_project_by_label(", client, ",", st.session_state.project, ")")
                 project: ProjectBean = get_cached_project_by_label(client, st.session_state.project)
                 if sample_doc and project is not None:
+                    if DEBUG:
+                        st.write("Calling get_cached_sample_doc(", client, ",", project.name, ")")
                     sample = get_cached_sample_doc(client, project.name)
+                if DEBUG:
+                    st.write("Calling get_cached_annotators(", client, ",", project.name, ",",
+                             tuple(annotator_types) if annotator_types is not None else None, ",",
+                             favorite_only, ")")
                 all_annotators = get_cached_annotators(client, project.name,
                                                        tuple(annotator_types) if annotator_types is not None else None,
                                                        favorite_only) if project is not None else []
@@ -100,6 +112,12 @@ def visualize(  # noqa: C901
                     [p.label for p in all_annotators if annotators is None or p.name in annotators])
                 st.sidebar.selectbox(annotator_selector_title, selected_annotators, key="annotator")
                 if st.session_state.get('annotator', None) is not None:
+                    if DEBUG:
+                        st.write("Calling get_cached_annotator_by_label(", client, ",", project.name, ",",
+                                 st.session_state.annotator, ",",
+                                 tuple(
+                                     annotator_types) if annotator_types is not None else None, ",",
+                                 favorite_only, ")")
                     annotator = get_cached_annotator_by_label(client, project.name, st.session_state.annotator,
                                                               tuple(
                                                                   annotator_types) if annotator_types is not None else None,
@@ -205,7 +223,8 @@ def visualize(  # noqa: C901
                             data=formatted.payload,
                             file_name=formatted.file_name,
                             mime=formatted.mime_type)
-                    if formatted.mime_type in ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
+                    if formatted.mime_type in ['text/csv',
+                                               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
                         visualize_table(formatted, annotator)
     except BaseException as e:
         st.exception(e)

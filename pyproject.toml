@@ -29,7 +29,6 @@ requires = [
     "streamlit~=1.2.0",
     "st-annotated-text",
     "sherpa-client==0.9.19",
-    "requests",
     "plac",
     "collections-extended>=1.0.2",
     "python-multipart",
