@@ -129,11 +129,22 @@ class ExtendedAnnotator:
 
 
 class StreamlitSherpaClient:
+    register = {}
+
     def __init__(self, server: str, user: str, password: str, **kawargs):
         url = server[0:-1] if server.endswith('/') else server
         self.client = SherpaClient(base_url=f"{url}/api", verify_ssl=False, timeout=100)
         self.client.login(Credentials(email=user, password=password),
                           project_access_mode=RequestJwtTokenProjectAccessMode.READ)
+        StreamlitSherpaClient.register[self.token] = self
+
+    @property
+    def token(self):
+        return self.client.token
+
+    @staticmethod
+    def from_token(token: str):
+        return StreamlitSherpaClient.register.get(token, None)
 
     def get_projects(self) -> List[ProjectBean]:
         r = get_projects.sync_detailed(client=self.client)

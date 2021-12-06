@@ -10,7 +10,7 @@ from sherpa_client.types import UNSET, File
 from streamlit.uploaded_file_manager import UploadedFile
 # fmt: off
 from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached_projects, \
-    get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label
+    get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label, get_client
 from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
 
 DEBUG = True
@@ -73,12 +73,12 @@ def visualize(  # noqa: C901
                 pwd_input = st.text_input(label='Password', value="", type="password")
                 submit_button = st.form_submit_button(label='Connect')
                 if submit_button:
-                    st.session_state['client'] = StreamlitSherpaClient(url_input, name_input, pwd_input)
+                    st.session_state['token'] = StreamlitSherpaClient(url_input, name_input, pwd_input).token
         else:
             url_input = st.secrets.sherpa_credentials.get('url', "https://sherpa-sandbox.kairntech.com/")
             name_input = st.secrets.sherpa_credentials.username
             pwd_input = st.secrets.sherpa_credentials.password
-            st.session_state['client'] = StreamlitSherpaClient(url_input, name_input, pwd_input)
+            st.session_state['token'] = StreamlitSherpaClient(url_input, name_input, pwd_input).token
     except BaseException as e:
         st.exception(e)
 
@@ -86,26 +86,26 @@ def visualize(  # noqa: C901
     project = None
     sample = None
     try:
-        client = st.session_state.get('client', None)
-        if client is not None:
+        token = st.session_state.get('token', None)
+        if token is not None:
             if DEBUG:
-                st.write("Calling get_cached_projects(", client, ")")
-            all_projects = get_cached_projects(client)
+                st.write("Calling get_cached_projects(", token, ")")
+            all_projects = get_cached_projects(token)
             selected_projects = sorted([p.label for p in all_projects if projects is None or p.name in projects])
             st.sidebar.selectbox(project_selector_title, selected_projects, key="project")
             if st.session_state.get('project', None) is not None:
                 if DEBUG:
-                    st.write("Calling get_cached_project_by_label(", client, ",", st.session_state.project, ")")
-                project: ProjectBean = get_cached_project_by_label(client, st.session_state.project)
+                    st.write("Calling get_cached_project_by_label(", token, ",", st.session_state.project, ")")
+                project: ProjectBean = get_cached_project_by_label(token, st.session_state.project)
                 if sample_doc and project is not None:
                     if DEBUG:
-                        st.write("Calling get_cached_sample_doc(", client, ",", project.name, ")")
-                    sample = get_cached_sample_doc(client, project.name)
+                        st.write("Calling get_cached_sample_doc(", token, ",", project.name, ")")
+                    sample = get_cached_sample_doc(token, project.name)
                 if DEBUG:
-                    st.write("Calling get_cached_annotators(", client, ",", project.name, ",",
+                    st.write("Calling get_cached_annotators(", token, ",", project.name, ",",
                              tuple(annotator_types) if annotator_types is not None else None, ",",
                              favorite_only, ")")
-                all_annotators = get_cached_annotators(client, project.name,
+                all_annotators = get_cached_annotators(token, project.name,
                                                        tuple(annotator_types) if annotator_types is not None else None,
                                                        favorite_only) if project is not None else []
                 selected_annotators = sorted(
@@ -113,12 +113,12 @@ def visualize(  # noqa: C901
                 st.sidebar.selectbox(annotator_selector_title, selected_annotators, key="annotator")
                 if st.session_state.get('annotator', None) is not None:
                     if DEBUG:
-                        st.write("Calling get_cached_annotator_by_label(", client, ",", project.name, ",",
+                        st.write("Calling get_cached_annotator_by_label(", token, ",", project.name, ",",
                                  st.session_state.annotator, ",",
                                  tuple(
                                      annotator_types) if annotator_types is not None else None, ",",
                                  favorite_only, ")")
-                    annotator = get_cached_annotator_by_label(client, project.name, st.session_state.annotator,
+                    annotator = get_cached_annotator_by_label(token, project.name, st.session_state.annotator,
                                                               tuple(
                                                                   annotator_types) if annotator_types is not None else None,
                                                               favorite_only)
@@ -128,13 +128,14 @@ def visualize(  # noqa: C901
                 if project is not None and show_project:
                     with colp:
                         project_exp = st.expander("Project definition (json)")
-                        project_exp.json(client.get_project(project).to_dict())
+                        project_exp.json(project.to_dict())
                     if annotator is not None and show_annotator:
                         with cola:
                             annotator_exp = st.expander("Annotator definition (json)")
                             annotator_exp.json(annotator.to_dict())
 
             if project is not None and annotator is not None:
+                client = get_client(token)
                 doc: AnnotatedDocument = None
                 text: str = None
                 uploaded_file: UploadedFile = None

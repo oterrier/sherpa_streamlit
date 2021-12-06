@@ -11,6 +11,7 @@ from htbuilder.units import unit
 from sherpa_client.models import Document, ProjectBean
 
 # Only works in 3.7+: from htbuilder import div, span
+
 div = H.div
 # Only works in 3.7+: from htbuilder.units import px, rem, em
 px = unit.px
@@ -43,56 +44,61 @@ HASH_FUNCS = {
 }
 
 
-@st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_projects(client) -> List[ProjectBean]:
+def get_client(token: str):
+    from sherpa_streamlit.sherpa import StreamlitSherpaClient
+    return StreamlitSherpaClient.from_token(token)
+
+
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False)
+def get_cached_projects(token: str) -> List[ProjectBean]:
     if DEBUG:
-        st.write("Cache miss: get_cached_projects(", client, ") ran")
-    return client.get_projects()
+        st.write("Cache miss: get_cached_projects(", token, ") ran")
+    return get_client(token).get_projects()
 
 
-@st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_sample_doc(client, project: str) -> Document:
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False)
+def get_cached_sample_doc(token: str, project: str) -> Document:
     if DEBUG:
-        st.write("Cache miss: get_cached_sample_doc(", client, ",", project, ") ran")
-    return client.get_sample_doc(project)
+        st.write("Cache miss: get_cached_sample_doc(", token, ",", project, ") ran")
+    return get_client(token).get_sample_doc(project)
 
 
-@st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_annotators(client, project: str, annotator_types: Tuple[str] = None,
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False)
+def get_cached_annotators(token: str, project: str, annotator_types: Tuple[str] = None,
                           favorite_only: bool = False):
     if DEBUG:
-        st.write("Cache miss: get_cached_annotators(", client, ",", project, ",", annotator_types, ",", favorite_only,
+        st.write("Cache miss: get_cached_annotators(", token, ",", project, ",", annotator_types, ",", favorite_only,
                  ") ran")
-    return client.get_annotators(project, annotator_types, favorite_only)
+    return get_client(token).get_annotators(project, annotator_types, favorite_only)
 
 
-@st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_annotator_by_label(client, project: str, label: str,
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False)
+def get_cached_annotator_by_label(token: str, project: str, label: str,
                                   annotator_types: Tuple[str] = None,
                                   favorite_only: bool = False):
     if DEBUG:
-        st.write("Cache miss: get_cached_annotator_by_label(", client, ",", project, ",", label, ",",
+        st.write("Cache miss: get_cached_annotator_by_label(", token, ",", project, ",", label, ",",
                  annotator_types, ",",
                  favorite_only, ") ran")
-    annotators = get_cached_annotators(client, project, annotator_types, favorite_only)
+    annotators = get_cached_annotators(token, project, annotator_types, favorite_only)
     for ann in annotators:
         if ann.label == label:
             return ann
     return None
 
 
-@st.cache(hash_funcs=HASH_FUNCS, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_project_by_label(client, label: str) -> ProjectBean:
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False)
+def get_cached_project_by_label(token: str, label: str) -> ProjectBean:
     if DEBUG:
-        st.write("Cache miss: get_cached_project_by_label(", client, ",", label, ") ran")
-    projects = get_cached_projects(client)
+        st.write("Cache miss: get_cached_project_by_label(", token, ",", label, ") ran")
+    projects = get_cached_projects(token)
     for p in projects:
         if p.label == label:
             return p
     return None
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.experimental_memo(suppress_st_warning=True)
 def get_logo():
     srcdir = Path(__file__).parent
     image = Image.open(srcdir / 'kairntech-1000-Blockmark.png')
