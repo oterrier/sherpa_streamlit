@@ -30,7 +30,7 @@ requires = [
     "st-annotated-text",
     "sherpa-client==0.9.19",
     "requests",
-    "plac==0.9.6",
+    "plac",
     "collections-extended>=1.0.2",
     "python-multipart",
     "Pillow",
