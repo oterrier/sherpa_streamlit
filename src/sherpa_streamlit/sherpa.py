@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from typing import Any, Dict, Type, TypeVar, Union
 from typing import Tuple, Sequence, List
 
@@ -18,7 +17,7 @@ from sherpa_client.models import Credentials, RequestJwtTokenProjectAccessMode, 
     Document, ProjectBean, AnnotationPlan
 from sherpa_client.sherpa import SherpaClient
 from sherpa_client.types import File, Unset, UNSET, Response
-from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
+from streamlit.uploaded_file_manager import UploadedFile
 
 T = TypeVar("T", bound="ExtendedAnnotator")
 
@@ -134,7 +133,7 @@ class StreamlitSherpaClient:
         url = server[0:-1] if server.endswith('/') else server
         self.client = SherpaClient(base_url=f"{url}/api", verify_ssl=False, timeout=100)
         self.client.login(Credentials(email=user, password=password),
-                   project_access_mode=RequestJwtTokenProjectAccessMode.READ)
+                          project_access_mode=RequestJwtTokenProjectAccessMode.READ)
 
     def get_projects(self) -> List[ProjectBean]:
         r = get_projects.sync_detailed(client=self.client)
@@ -168,8 +167,7 @@ class StreamlitSherpaClient:
         return doc
 
     def get_annotators(self, project: Union[str, ProjectBean], annotator_types: Tuple[str] = None,
-                       favorite_only: bool = False) -> List[
-        ExtendedAnnotator]:
+                       favorite_only: bool = False) -> List[ExtendedAnnotator]:
         pname = project.name if isinstance(project, ProjectBean) else project
         # st.write("get_annotators(", project, ", ", annotator_types,", ", favorite_only, ")")
         r = get_annotators_by_type.sync_detailed(pname, client=self.client)
@@ -263,8 +261,8 @@ class StreamlitSherpaClient:
         aname = annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
         long_client = self.client.with_timeout(1000)
         r = annotate_format_text_with_plan_ref.sync_detailed(pname, aname,
-                                                                  text_body=text,
-                                                                  client=long_client)
+                                                             text_body=text,
+                                                             client=long_client)
         # r = annotate_format_documents_with_plan_ref.sync_detailed(pname, aname,
         #                                                           json_body=[InputDocument(text=text)],
         #                                                           client=self.client)
@@ -358,60 +356,59 @@ class StreamlitSherpaClient:
         else:
             r.raise_for_status()
 
-
-def main():
-    url_input = "https://sherpa-sandbox.kairntech.com/"
-    url = url_input[0:-1] if url_input.endswith('/') else url_input
-    client = StreamlitSherpaClient(url, "demo", "")
-    projects = client.get_projects()
-    print(projects)
-
-    for project in projects:
-        annotators = client.get_annotators(project.name)
-        print(annotators)
-        if annotators:
-            annotator = annotators[0]
-
-            ann = client.get_annotator_by_label(project.name, annotator.label)
-            print(ann)
-
-            doc = client.get_sample_doc(project.name)
-            print(doc)
-
-            labels = client.get_labels(project.name)
-            print(labels)
-
-            converter = ann.parameters.converter if ann.type == 'plan' else None
-            formatter = ann.parameters.formatter if ann.type == 'plan' else None
-            if converter and converter.name == 'tika':
-                datafile = Path("/home/olivier/Téléchargements/attentats.odt")
-                with datafile.open("rb") as fin:
-                    if formatter:
-                        result = client.annotate_format_binary(project.name, ann.name,
-                                                               UploadedFile(UploadedFileRec(id=1, name=datafile.name,
-                                                                                            type='application/octet-stream',
-                                                                                            data=fin.read())))
-                        print(result)
-
-                    else:
-                        result = client.annotate_binary(project.name, ann.name,
-                                                        UploadedFile(UploadedFileRec(id=1, name=datafile.name,
-                                                                                     type='application/octet-stream',
-                                                                                     data=fin.read())))
-                        print(result)
-
-            if formatter:
-                result = client.annotate_format_text(project.name, ann.name, doc.text)
-                print(result)
-
-            else:
-                result = client.annotate_text(project.name, ann.name, doc.text)
-                print(result)
-
-    pass
-
-
-import plac
-
-if __name__ == "__main__":
-    plac.call(main)
+# def main():
+#     url_input = "https://sherpa-sandbox.kairntech.com/"
+#     url = url_input[0:-1] if url_input.endswith('/') else url_input
+#     client = StreamlitSherpaClient(url, "demo", "")
+#     projects = client.get_projects()
+#     print(projects)
+#
+#     for project in projects:
+#         annotators = client.get_annotators(project.name)
+#         print(annotators)
+#         if annotators:
+#             annotator = annotators[0]
+#
+#             ann = client.get_annotator_by_label(project.name, annotator.label)
+#             print(ann)
+#
+#             doc = client.get_sample_doc(project.name)
+#             print(doc)
+#
+#             labels = client.get_labels(project.name)
+#             print(labels)
+#
+#             converter = ann.parameters.converter if ann.type == 'plan' else None
+#             formatter = ann.parameters.formatter if ann.type == 'plan' else None
+#             if converter and converter.name == 'tika':
+#                 datafile = Path("/home/olivier/Téléchargements/attentats.odt")
+#                 with datafile.open("rb") as fin:
+#                     if formatter:
+#                         result = client.annotate_format_binary(project.name, ann.name,
+#                                                                UploadedFile(UploadedFileRec(id=1, name=datafile.name,
+#                                                                                             type='application/octet-stream',
+#                                                                                             data=fin.read())))
+#                         print(result)
+#
+#                     else:
+#                         result = client.annotate_binary(project.name, ann.name,
+#                                                         UploadedFile(UploadedFileRec(id=1, name=datafile.name,
+#                                                                                      type='application/octet-stream',
+#                                                                                      data=fin.read())))
+#                         print(result)
+#
+#             if formatter:
+#                 result = client.annotate_format_text(project.name, ann.name, doc.text)
+#                 print(result)
+#
+#             else:
+#                 result = client.annotate_text(project.name, ann.name, doc.text)
+#                 print(result)
+#
+#     pass
+#
+#
+# import plac
+#
+# if __name__ == "__main__":
+#     plac.call(main)
