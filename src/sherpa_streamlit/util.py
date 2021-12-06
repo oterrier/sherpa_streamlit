@@ -39,7 +39,7 @@ def get_token(server: str, user: str, password: str):
         r.raise_for_status()
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_projects(server: str, token: str):
     url = f"{server}/api/projects"
     headers = {'Authorization': 'Bearer ' + token, 'Content-Type': "application/json", 'Accept': "application/json"}
@@ -66,7 +66,7 @@ def get_project(server: str, name: str, token: str):
     return None
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_sample_doc(server: str, project: str, token: str):
     doc = None
     url = f"{server}/api/projects/{project}/documents/_sample"
@@ -81,7 +81,7 @@ def get_sample_doc(server: str, project: str, token: str):
     return doc
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_annotators(server: str, project: str, annotator_types: Tuple[str], favorite_only: bool, token: str):
     # st.write("get_annotators(", server, ", ", project, ", ", annotator_types,", ", favorite_only, ")")
     url = f"{server}/api/projects/{project}/annotators_by_type"
@@ -105,7 +105,7 @@ def get_annotators(server: str, project: str, annotator_types: Tuple[str], favor
     return annotators
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_labels(server: str, project: str, token: str):
     url = f"{server}/api/projects/{project}/labels"
     headers = {'Authorization': 'Bearer ' + token, 'Content-Type': "application/json", 'Accept': "application/json"}
@@ -118,7 +118,7 @@ def get_labels(server: str, project: str, token: str):
     return labels
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_annotator_by_label(server: str, project: str, annotator_types: Tuple[str], favorite_only: bool,
                            label: str, token: str):
     # st.write("get_annotator_by_label(", server, ", ", project, ", ", label, ")")
@@ -155,7 +155,7 @@ def has_formatter(ann):
     return result
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def get_plan(server: str, project: str, name: str, token: str):
     url = f"{server}/api/projects/{project}/plans/{name}"
     headers = {'Authorization': 'Bearer ' + token, 'Content-Type': "application/json", 'Accept': "application/json"}
@@ -166,7 +166,6 @@ def get_plan(server: str, project: str, name: str, token: str):
         r.raise_for_status()
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
 def annotate_text(server: str, project: str, annotator: str, text: str, token: str):
     # st.write("annotate_with_annotator(", server, ", ", project, ", ", annotator, ")")
     url = f"{server}/api/projects/{project}/annotators/{annotator}/_annotate"
@@ -181,7 +180,6 @@ def annotate_text(server: str, project: str, annotator: str, text: str, token: s
         r.raise_for_status()
 
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
 def annotate_format_text(server: str, project: str, annotator: str, text: str, token: str):
     # st.write("annotate_format_text(", server, ", ", project, ", ", annotator, ")")
     url = f"{server}/api/projects/{project}/plans/{annotator}/_annotate_format_text"
