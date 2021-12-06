@@ -92,15 +92,15 @@ def visualize(  # noqa: C901
             if st.session_state.get('project', None) is not None:
                 project: ProjectBean = get_cached_project_by_label(client, st.session_state.project)
                 if sample_doc and project is not None:
-                    sample = get_cached_sample_doc(client, project)
-                all_annotators = get_cached_annotators(client, project,
+                    sample = get_cached_sample_doc(client, project.name)
+                all_annotators = get_cached_annotators(client, project.name,
                                                        tuple(annotator_types) if annotator_types is not None else None,
                                                        favorite_only) if project is not None else []
                 selected_annotators = sorted(
                     [p.label for p in all_annotators if annotators is None or p.name in annotators])
                 st.sidebar.selectbox(annotator_selector_title, selected_annotators, key="annotator")
                 if st.session_state.get('annotator', None) is not None:
-                    annotator = get_cached_annotator_by_label(client, project, st.session_state.annotator,
+                    annotator = get_cached_annotator_by_label(client, project.name, st.session_state.annotator,
                                                               tuple(
                                                                   annotator_types) if annotator_types is not None else None,
                                                               favorite_only)
@@ -133,11 +133,12 @@ def visualize(  # noqa: C901
                             submittedf1 = st.form_submit_button('Process File')
                             if submittedf1:
                                 uploaded_file = st.session_state.get("file_to_analyze", None)
-                                if uploaded_file.type.startswith('audio'):
-                                    st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
-                                elif uploaded_file.type.startswith('video'):
-                                    st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
-                                    # st.video(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
+                                if uploaded_file is not None:
+                                    if uploaded_file.type.startswith('audio'):
+                                        st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
+                                    elif uploaded_file.type.startswith('video'):
+                                        st.audio(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
+                                        # st.video(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
                     with col2:
                         with st.form('Text2'):
                             st.text_area(text_msg, sample.text if sample is not None else default_text,

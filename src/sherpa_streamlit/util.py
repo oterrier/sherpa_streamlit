@@ -1,8 +1,6 @@
 import html
 from pathlib import Path
 from typing import Tuple, List
-from typing import Union
-
 import streamlit as st
 from PIL import Image
 from annotated_text import span, annotation
@@ -25,22 +23,21 @@ def get_cached_projects(client) -> List[ProjectBean]:
 
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_sample_doc(client, project: Union[str, ProjectBean]) -> Document:
+def get_cached_sample_doc(client, project: str) -> Document:
     return client.get_sample_doc(project)
 
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_annotators(client, project: Union[str, ProjectBean], annotator_types: Tuple[str] = None,
+def get_cached_annotators(client, project: str, annotator_types: Tuple[str] = None,
                           favorite_only: bool = False):
     return client.get_annotators(project, annotator_types, favorite_only)
 
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def get_cached_annotator_by_label(client, project: Union[str, ProjectBean], label: str,
+def get_cached_annotator_by_label(client, project: str, label: str,
                                   annotator_types: Tuple[str] = None,
                                   favorite_only: bool = False):
-    pname = project.name if isinstance(project, ProjectBean) else project
-    annotators = get_cached_annotators(client, pname, annotator_types, favorite_only)
+    annotators = get_cached_annotators(client, project, annotator_types, favorite_only)
     for ann in annotators:
         if ann.label == label:
             return ann
