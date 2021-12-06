@@ -19,7 +19,6 @@ from sherpa_client.models import Credentials, RequestJwtTokenProjectAccessMode, 
 from sherpa_client.sherpa import SherpaClient
 from sherpa_client.types import File, Unset, UNSET, Response
 from streamlit.uploaded_file_manager import UploadedFile, UploadedFileRec
-from methodtools import lru_cache
 
 T = TypeVar("T", bound="ExtendedAnnotator")
 

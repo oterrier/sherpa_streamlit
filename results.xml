@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="3" failures="0" skipped="2" tests="5" time="1.499" timestamp="2021-12-06T10:08:11.358993" hostname="OLI-OMEN"><testcase classname="examples.streamlit_app" name="FLAKE8" time="0.000"><skipped type="pytest.skip" message="file(s) previously passed FLAKE8 checks">/home/olivier/dev/kairntech/sherpa_streamlit/.tox/py38/lib/python3.8/site-packages/pytest_flake8.py:116: file(s) previously passed FLAKE8 checks</skipped></testcase><testcase classname="src.sherpa_streamlit.__init__" name="FLAKE8" time="0.000"><skipped type="pytest.skip" message="file(s) previously passed FLAKE8 checks">/home/olivier/dev/kairntech/sherpa_streamlit/.tox/py38/lib/python3.8/site-packages/pytest_flake8.py:116: file(s) previously passed FLAKE8 checks</skipped></testcase><testcase classname="src.sherpa_streamlit.sherpa" name="FLAKE8" time="0.981"><error message="failed on setup with &quot;_pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.&#10;Hint: make sure your test modules/packages have valid Python names.&#10;Traceback:&#10;../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module&#10;    return _bootstrap._gcd_import(name[level:], package, level)&#10;src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;&#10;    from .visualizer import visualize&#10;src/sherpa_streamlit/visualizer.py:8: in &lt;module&gt;&#10;    from sherpa_client.models import AnnotatedDocument, ProjectBean&#10;E   ModuleNotFoundError: No module named 'sherpa_client'&quot;">self = &lt;Package sherpa_streamlit&gt;
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="3" failures="0" skipped="1" tests="5" time="1.310" timestamp="2021-12-06T10:15:09.877113" hostname="OLI-OMEN"><testcase classname="examples.streamlit_app" name="FLAKE8" time="0.000"><skipped type="pytest.skip" message="file(s) previously passed FLAKE8 checks">/home/olivier/dev/kairntech/sherpa_streamlit/.tox/py38/lib/python3.8/site-packages/pytest_flake8.py:116: file(s) previously passed FLAKE8 checks</skipped></testcase><testcase classname="src.sherpa_streamlit.__init__" name="FLAKE8" time="0.057" /><testcase classname="src.sherpa_streamlit.sherpa" name="FLAKE8" time="0.771"><error message="failed on setup with &quot;_pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.&#10;Hint: make sure your test modules/packages have valid Python names.&#10;Traceback:&#10;../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module&#10;    return _bootstrap._gcd_import(name[level:], package, level)&#10;src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;&#10;    from .visualizer import visualize&#10;src/sherpa_streamlit/visualizer.py:8: in &lt;module&gt;&#10;    from sherpa_client.models import AnnotatedDocument, ProjectBean&#10;E   ModuleNotFoundError: No module named 'sherpa_client'&quot;">self = &lt;Package sherpa_streamlit&gt;
 
     def _importtestmodule(self):
         # We assume we are only called once per module.
@@ -121,28 +121,28 @@ name = 'sherpa_streamlit', package = None, level = 0
 &lt;frozen importlib._bootstrap&gt;:1014: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f6e2c0fb430&gt;
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f18f4662430&gt;
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:991: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f6e2c0fb430&gt;
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f18f4662430&gt;
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:975: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
+spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f18eb1b6ac0&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:671: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
+self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f18eb1b6ac0&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
 
 &gt;   ???
 
@@ -150,7 +150,7 @@ self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
 f = &lt;built-in function exec&gt;
-args = (&lt;code object &lt;module&gt; at 0x7f6e22c73be0, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
+args = (&lt;code object &lt;module&gt; at 0x7f18f09dec90, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
 kwds = {}
 
 &gt;   ???
@@ -159,7 +159,7 @@ kwds = {}
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
     "Kairntech Sherpa building blocks for Streamlit apps"
-    __version__ = "0.1.17"
+    __version__ = "0.2.0"
     
 &gt;   from .visualizer import visualize
 
@@ -208,8 +208,8 @@ self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': 
 .tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.config.PytestPluginManager object at 0x7f6e2bfc3160&gt;, hook_name = 'pytest_runtest_setup'
-methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6e272940a0&gt;&gt;, ...]
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f18f452a160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f18ef7fa2b0&gt;&gt;, ...]
 kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, firstresult = False
 
     def _hookexec(self, hook_name, methods, kwargs, firstresult):
@@ -229,7 +229,7 @@ item = &lt;Flake8Item sherpa.py&gt;
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -252,7 +252,7 @@ self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:452: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -475,28 +475,28 @@ name = 'sherpa_streamlit', package = None, level = 0
 &lt;frozen importlib._bootstrap&gt;:1014: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f6e2c0fb430&gt;
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f18f4662430&gt;
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:991: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f6e2c0fb430&gt;
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f18f4662430&gt;
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:975: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
+spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f18eb1b6ac0&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:671: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
+self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f18eb1b6ac0&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
 
 &gt;   ???
 
@@ -504,7 +504,7 @@ self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
 f = &lt;built-in function exec&gt;
-args = (&lt;code object &lt;module&gt; at 0x7f6e22c73be0, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
+args = (&lt;code object &lt;module&gt; at 0x7f18f09dec90, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
 kwds = {}
 
 &gt;   ???
@@ -513,7 +513,7 @@ kwds = {}
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
     "Kairntech Sherpa building blocks for Streamlit apps"
-    __version__ = "0.1.17"
+    __version__ = "0.2.0"
     
 &gt;   from .visualizer import visualize
 
@@ -562,8 +562,8 @@ self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': 
 .tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.config.PytestPluginManager object at 0x7f6e2bfc3160&gt;, hook_name = 'pytest_runtest_setup'
-methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6e272940a0&gt;&gt;, ...]
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f18f452a160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f18ef7fa2b0&gt;&gt;, ...]
 kwargs = {'item': &lt;Flake8Item util.py&gt;}, firstresult = False
 
     def _hookexec(self, hook_name, methods, kwargs, firstresult):
@@ -583,7 +583,7 @@ item = &lt;Flake8Item util.py&gt;
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item util.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item util.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -597,7 +597,7 @@ self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:443: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6e22c763a0&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
+cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f18eb1dd430&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
 
     @classmethod
     def from_call(
@@ -651,8 +651,8 @@ self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': 
 .tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.config.PytestPluginManager object at 0x7f6e2bfc3160&gt;, hook_name = 'pytest_runtest_setup'
-methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6e272940a0&gt;&gt;, ...]
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f18f452a160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f18ef7fa2b0&gt;&gt;, ...]
 kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, firstresult = False
 
     def _hookexec(self, hook_name, methods, kwargs, firstresult):
@@ -672,7 +672,7 @@ item = &lt;Flake8Item sherpa.py&gt;
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -695,7 +695,7 @@ self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:452: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -918,28 +918,28 @@ name = 'sherpa_streamlit', package = None, level = 0
 &lt;frozen importlib._bootstrap&gt;:1014: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f6e2c0fb430&gt;
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f18f4662430&gt;
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:991: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f6e2c0fb430&gt;
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f18f4662430&gt;
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:975: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
+spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f18eb1b6ac0&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
 
 &gt;   ???
 
 &lt;frozen importlib._bootstrap&gt;:671: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
+self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f18eb1b6ac0&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
 
 &gt;   ???
 
@@ -947,7 +947,7 @@ self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f6e22c8f490&
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
 f = &lt;built-in function exec&gt;
-args = (&lt;code object &lt;module&gt; at 0x7f6e22c73be0, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
+args = (&lt;code object &lt;module&gt; at 0x7f18f09dec90, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
 kwds = {}
 
 &gt;   ???
@@ -956,7 +956,7 @@ kwds = {}
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
     "Kairntech Sherpa building blocks for Streamlit apps"
-    __version__ = "0.1.17"
+    __version__ = "0.2.0"
     
 &gt;   from .visualizer import visualize
 
@@ -1005,8 +1005,8 @@ self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': 
 .tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.config.PytestPluginManager object at 0x7f6e2bfc3160&gt;, hook_name = 'pytest_runtest_setup'
-methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6e272940a0&gt;&gt;, ...]
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f18f452a160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f18ef7fa2b0&gt;&gt;, ...]
 kwargs = {'item': &lt;Flake8Item visualizer.py&gt;}, firstresult = False
 
     def _hookexec(self, hook_name, methods, kwargs, firstresult):
@@ -1026,7 +1026,7 @@ item = &lt;Flake8Item visualizer.py&gt;
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item visualizer.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item visualizer.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -1040,7 +1040,7 @@ self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:443: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6df47cdf70&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
+cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f18bccbcaf0&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
 
     @classmethod
     def from_call(
@@ -1094,8 +1094,8 @@ self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': 
 .tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.config.PytestPluginManager object at 0x7f6e2bfc3160&gt;, hook_name = 'pytest_runtest_setup'
-methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6e272940a0&gt;&gt;, ...]
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f18f452a160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f18ef7fa2b0&gt;&gt;, ...]
 kwargs = {'item': &lt;Flake8Item util.py&gt;}, firstresult = False
 
     def _hookexec(self, hook_name, methods, kwargs, firstresult):
@@ -1115,7 +1115,7 @@ item = &lt;Flake8Item util.py&gt;
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item util.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item util.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -1129,7 +1129,7 @@ self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:443: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6e22c763a0&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
+cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f18eb1dd430&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
 
     @classmethod
     def from_call(
@@ -1183,8 +1183,8 @@ self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': 
 .tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.config.PytestPluginManager object at 0x7f6e2bfc3160&gt;, hook_name = 'pytest_runtest_setup'
-methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6e272940a0&gt;&gt;, ...]
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f18f452a160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f18ef7fa2b0&gt;&gt;, ...]
 kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, firstresult = False
 
     def _hookexec(self, hook_name, methods, kwargs, firstresult):
@@ -1204,7 +1204,7 @@ item = &lt;Flake8Item sherpa.py&gt;
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
@@ -1227,7 +1227,7 @@ self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt
 .tox/py38/lib/python3.8/site-packages/_pytest/runner.py:452: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;_pytest.runner.SetupState object at 0x7f6e283da730&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+self = &lt;_pytest.runner.SetupState object at 0x7f18f0941760&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
 
     def prepare(self, colitem) -&gt; None:
         """Setup objects along the collector chain to the test-method."""
