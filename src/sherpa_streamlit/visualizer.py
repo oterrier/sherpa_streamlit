@@ -142,7 +142,7 @@ def visualize(  # noqa: C901
                     with col2:
                         with st.form('Text2'):
                             st.text_area(text_msg, sample.text if sample is not None else default_text,
-                                         max_chars=10000, key="text_to_analyze")
+                                         max_chars=100000, key="text_to_analyze")
                             submittedt2 = st.form_submit_button('Process Text')
                             if submittedt2:
                                 text = st.session_state.get("text_to_analyze", None)
@@ -152,7 +152,7 @@ def visualize(  # noqa: C901
                     with col1:
                         with st.form('Text1'):
                             st.text_area(text_msg, sample.text if sample is not None else default_text,
-                                         max_chars=10000, key="text_to_analyze")
+                                         max_chars=100000, key="text_to_analyze")
                             submittedt1 = st.form_submit_button('Process Text')
                             if submittedt1:
                                 text = st.session_state.get("text_to_analyze", None)
