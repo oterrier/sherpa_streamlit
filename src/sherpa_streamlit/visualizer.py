@@ -1,21 +1,20 @@
 from typing import List, Optional, Iterable, cast
-
 import pandas as pd
 import plac
 import streamlit as st
 import streamlit.components.v1 as components
 from annotated_text import annotation
 from collections_extended import RangeMap
+from sherpa_client.models import AnnotatedDocument, ProjectBean
+from sherpa_client.types import UNSET, File
 from streamlit.uploaded_file_manager import UploadedFile
-
 # fmt: off
-from .util import get_token, get_projects, get_project_by_label, get_project, get_annotators, get_annotator_by_label, \
-    has_converter, has_formatter, annotate_text, annotate_format_text, \
-    annotate_binary, annotate_format_binary, LOGO, clean_html, clean_annotation, annotated_text, annotate_format_json, \
-    annotate_json, get_sample_doc
+from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached_projects, \
+    get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label
+from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
 
 # fmt: on
-FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](https://streamlit.io/) and largerly inspired by the great [`spacy-streamlit`](https://github.com/explosion/spacy-streamlit)</span>"""
+FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](https://streamlit.io/) and [`sherpa-streamlit`](https://github.com/oterrier/sherpa_streamlit)</span>"""
 
 
 def visualize(  # noqa: C901
@@ -72,61 +71,61 @@ def visualize(  # noqa: C901
                 pwd_input = st.text_input(label='Password', value="", type="password")
                 submit_button = st.form_submit_button(label='Connect')
                 if submit_button:
-                    st.session_state['token'] = get_token(url_input, name_input, pwd_input)
+                    st.session_state['client'] = StreamlitSherpaClient(url_input, name_input, pwd_input)
         else:
             url_input = st.secrets.sherpa_credentials.get('url', "https://sherpa-sandbox.kairntech.com/")
             name_input = st.secrets.sherpa_credentials.username
             pwd_input = st.secrets.sherpa_credentials.password
-            st.session_state['token'] = get_token(url_input, name_input, pwd_input)
+            st.session_state['client'] = StreamlitSherpaClient(url_input, name_input, pwd_input)
     except BaseException as e:
         st.exception(e)
 
     annotator = None
     project = None
     sample = None
-    url = url_input[0:-1] if url_input.endswith('/') else url_input
     try:
-        if st.session_state.get('token', None) is not None:
-            all_projects = get_projects(url, st.session_state.token)
-            selected_projects = sorted([p['label'] for p in all_projects if projects is None or p['name'] in projects])
+        client = st.session_state.get('client', None)
+        if client is not None:
+            all_projects = get_cached_projects(client)
+            selected_projects = sorted([p.label for p in all_projects if projects is None or p.name in projects])
             st.sidebar.selectbox(project_selector_title, selected_projects, key="project")
             if st.session_state.get('project', None) is not None:
-                project = get_project_by_label(url, st.session_state.project, st.session_state.token)
+                project: ProjectBean = get_cached_project_by_label(client, st.session_state.project)
                 if sample_doc and project is not None:
-                    sample = get_sample_doc(url, project, st.session_state.token)
-                all_annotators = get_annotators(url,
-                                                project,
-                                                tuple(annotator_types) if annotator_types is not None else None,
-                                                favorite_only,
-                                                st.session_state.token) if project is not None else []
+                    sample = get_cached_sample_doc(client, project)
+                all_annotators = get_cached_annotators(client, project,
+                                                       tuple(annotator_types) if annotator_types is not None else None,
+                                                       favorite_only) if project is not None else []
                 selected_annotators = sorted(
-                    [p['label'] for p in all_annotators if annotators is None or p['name'] in annotators])
+                    [p.label for p in all_annotators if annotators is None or p.name in annotators])
                 st.sidebar.selectbox(annotator_selector_title, selected_annotators, key="annotator")
                 if st.session_state.get('annotator', None) is not None:
-                    annotator = get_annotator_by_label(url, project,
-                                                       tuple(annotator_types) if annotator_types is not None else None,
-                                                       favorite_only,
-                                                       st.session_state.annotator, st.session_state.token)
+                    annotator = get_cached_annotator_by_label(client, project, st.session_state.annotator,
+                                                              tuple(
+                                                                  annotator_types) if annotator_types is not None else None,
+                                                              favorite_only)
 
             if show_project or show_annotator:
                 colp, cola, = st.columns(2)
                 if project is not None and show_project:
                     with colp:
                         project_exp = st.expander("Project definition (json)")
-                        project_exp.json(get_project(url, project, st.session_state.token))
+                        project_exp.json(client.get_project(project).to_dict())
                     if annotator is not None and show_annotator:
                         with cola:
                             annotator_exp = st.expander("Annotator definition (json)")
-                            annotator_exp.json(annotator)
+                            annotator_exp.json(annotator.to_dict())
 
             if project is not None and annotator is not None:
-                doc = None
-                text = None
-                uploaded_file = None
-                result = None
+                doc: AnnotatedDocument = None
+                text: str = None
+                uploaded_file: UploadedFile = None
+                formatted: File = None
                 col1, col2, = st.columns(2)
-                if has_converter(annotator):
-                    file_msg = f"Upload binary file ({has_converter(annotator)['name']}) to analyze"
+                converter = annotator.parameters.converter if annotator.type == 'plan' else None
+                formatter = annotator.parameters.formatter if annotator.type == 'plan' else None
+                if converter:
+                    file_msg = f"Upload binary file ({converter.name}) to analyze"
                     text_msg = "Or input text to analyze"
                     with col1:
                         with st.form('File1'):
@@ -141,7 +140,7 @@ def visualize(  # noqa: C901
                                     # st.video(uploaded_file.getvalue(), format=uploaded_file.type, start_time=0)
                     with col2:
                         with st.form('Text2'):
-                            st.text_area(text_msg, sample['text'] if sample is not None else default_text,
+                            st.text_area(text_msg, sample.text if sample is not None else default_text,
                                          max_chars=10000, key="text_to_analyze")
                             submittedt2 = st.form_submit_button('Process Text')
                             if submittedt2:
@@ -151,7 +150,7 @@ def visualize(  # noqa: C901
                     file_msg = "Or upload text/json file to analyze"
                     with col1:
                         with st.form('Text1'):
-                            st.text_area(text_msg, sample['text'] if sample is not None else default_text,
+                            st.text_area(text_msg, sample.text if sample is not None else default_text,
                                          max_chars=10000, key="text_to_analyze")
                             submittedt1 = st.form_submit_button('Process Text')
                             if submittedt1:
@@ -165,32 +164,26 @@ def visualize(  # noqa: C901
 
                 if uploaded_file is not None:
                     uploaded_file = cast(UploadedFile, uploaded_file)
-                    if has_converter(annotator):
-                        if has_formatter(annotator):
-                            result = annotate_format_binary(url, project, annotator['name'], uploaded_file,
-                                                            st.session_state.token)
+                    if converter:
+                        if formatter:
+                            formatted = client.annotate_format_binary(project, annotator, uploaded_file)
                         else:
-                            docs = annotate_binary(url, project, annotator['name'], uploaded_file,
-                                                   st.session_state.token)
+                            docs = client.annotate_binary(project, annotator, uploaded_file)
                             doc = docs[0] if docs is not None else None
                     else:
                         if 'json' in uploaded_file.type:
-                            if has_formatter(annotator):
-                                result = annotate_format_json(url, project, annotator['name'], uploaded_file,
-                                                              st.session_state.token)
+                            if formatter:
+                                formatted = client.annotate_format_json(project, annotator, uploaded_file)
                             else:
-                                docs = annotate_json(url, project, annotator['name'], uploaded_file,
-                                                     st.session_state.token)
+                                docs = client.annotate_json(project, annotator, uploaded_file)
                                 doc = docs[0] if docs is not None else None
                         else:
                             text = uploaded_file.getvalue().decode("utf-8")
                 if text is not None:
-                    if has_formatter(annotator):
-                        result = annotate_format_text(url, project, annotator['name'], text,
-                                                      st.session_state.token)
+                    if formatter:
+                        formatted = client.annotate_format_text(project, annotator, text)
                     else:
-                        doc = annotate_text(url, project, annotator['name'], text,
-                                            st.session_state.token)
+                        doc = client.annotate_text(project, annotator, text)
 
                 if doc is not None:
                     col1, col2, = st.columns(2)
@@ -201,18 +194,18 @@ def visualize(  # noqa: C901
                             doc_exp = st.expander("Annotated doc (json)")
                             doc_exp.json(doc)
                     visualize_annotated_doc(doc, annotator)
-                if result is not None:
+                if formatted is not None:
                     col1, col2, = st.columns(2)
                     with col1:
                         st.success('Annotation & formatting successful!')
                     with col2:
                         st.download_button(
                             label="Download result",
-                            data=result.getvalue(),
-                            file_name=result.name,
-                            mime=result.type)
-                    if result.type in ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
-                        visualize_table(result, annotator)
+                            data=formatted.payload,
+                            file_name=formatted.file_name,
+                            mime=formatted.mime_type)
+                    if formatted.mime_type in ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
+                        visualize_table(formatted, annotator)
     except BaseException as e:
         st.exception(e)
     st.sidebar.markdown(
@@ -221,23 +214,24 @@ def visualize(  # noqa: C901
     )
 
 
-def visualize_table(result, annotator,
+def visualize_table(result: File,
+                    annotator: ExtendedAnnotator,
                     *,
                     title: Optional[str] = "Table",
                     key: Optional[str] = None
                     ):
     if title:
         st.header(title)
-    if result.type == 'text/csv':
-        df = pd.read_csv(result.getvalue())
-    elif result.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        df = pd.read_excel(result.getvalue())
+    if result.mime_type == 'text/csv':
+        df = pd.read_csv(result.payload)
+    elif result.mime_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        df = pd.read_excel(result.payload)
     st.dataframe(data=df)
 
 
 def visualize_annotated_doc(
-        doc,
-        annotator,
+        doc: AnnotatedDocument,
+        annotator: ExtendedAnnotator,
         *,
         title: Optional[str] = "Annotated Document",
         key: Optional[str] = None
@@ -245,36 +239,36 @@ def visualize_annotated_doc(
     """Visualizer for named entities."""
     if title:
         st.header(title)
-    categories = doc.get('categories', [])
-    labels = annotator['labels']
+    categories = doc.categories
+    labels = annotator.labels or {}
 
-    if categories:
+    if categories is not UNSET:
         categorized = []
         for cat in categories:
-            name = cat['labelName']
-            score = cat.get('score', 1.0)
-            color = labels.get(name, {}).get('color', "#333")
-            categorized.append(annotation(cat.get('label', name), "{:.0%}".format(score), color))
+            name = cat.label_name
+            score = cat.score or 1.0
+            color = labels.get(name).color if name in labels else "#333"
+            categorized.append(annotation(cat.label or name, "{:.0%}".format(score), color))
             categorized.append(" ")
 
         html = annotated_text(*categorized)
         st.write(html, unsafe_allow_html=True)
 
     annotation_map = RangeMap()
-    annotations = doc.get('annotations', [])
-    text = doc['text']
-    if annotations:
+    annotations = doc.annotations
+    text = doc.text
+    if annotations is not UNSET:
         for a in annotations:
-            annotation_map[a['start']:a['end']] = a
+            annotation_map[a.start:a.end] = a
         start = 0
         annotated = []
         for r in annotation_map.ranges():
             if r.start > start:
                 annotated.append(clean_html(text[start:r.start]))
             a = r.value
-            name = a['labelName']
-            color = labels.get(name, {}).get('color', "#333")
-            annotated.append(clean_annotation(text[r.start:r.stop], clean_html(a.get('label', name)), color))
+            name = a.label_name
+            color = labels.get(name).color if name in labels else "#333"
+            annotated.append(clean_annotation(text[r.start:r.stop], clean_html(a.label or name), color))
             start = r.stop
         if start < len(text):
             annotated.append(clean_html(text[start:]))
