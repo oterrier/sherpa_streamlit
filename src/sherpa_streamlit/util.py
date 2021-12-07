@@ -17,7 +17,6 @@ div = H.div
 px = unit.px
 rem = unit.rem
 em = unit.em
-DEBUG = True
 
 
 def ProjectBean_hash(self):
@@ -50,23 +49,23 @@ def get_client(token: str):
 
 
 @st.experimental_memo(suppress_st_warning=True, show_spinner=False)
-def get_cached_projects(token: str) -> List[ProjectBean]:
-    if DEBUG:
+def get_cached_projects(token: str, debug: bool = False) -> List[ProjectBean]:
+    if debug:
         st.write("Cache miss: get_cached_projects(", token, ") ran")
     return get_client(token).get_projects()
 
 
 @st.experimental_memo(suppress_st_warning=True, show_spinner=False)
-def get_cached_sample_doc(token: str, project: str) -> Document:
-    if DEBUG:
+def get_cached_sample_doc(token: str, project: str, debug: bool = False) -> Document:
+    if debug:
         st.write("Cache miss: get_cached_sample_doc(", token, ",", project, ") ran")
     return get_client(token).get_sample_doc(project)
 
 
 @st.experimental_memo(suppress_st_warning=True, show_spinner=False)
 def get_cached_annotators(token: str, project: str, annotator_types: Tuple[str] = None,
-                          favorite_only: bool = False):
-    if DEBUG:
+                          favorite_only: bool = False, debug: bool = False):
+    if debug:
         st.write("Cache miss: get_cached_annotators(", token, ",", project, ",", annotator_types, ",", favorite_only,
                  ") ran")
     return get_client(token).get_annotators(project, annotator_types, favorite_only)
@@ -75,8 +74,8 @@ def get_cached_annotators(token: str, project: str, annotator_types: Tuple[str] 
 @st.experimental_memo(suppress_st_warning=True, show_spinner=False)
 def get_cached_annotator_by_label(token: str, project: str, label: str,
                                   annotator_types: Tuple[str] = None,
-                                  favorite_only: bool = False):
-    if DEBUG:
+                                  favorite_only: bool = False, debug: bool = False):
+    if debug:
         st.write("Cache miss: get_cached_annotator_by_label(", token, ",", project, ",", label, ",",
                  annotator_types, ",",
                  favorite_only, ") ran")
@@ -88,8 +87,8 @@ def get_cached_annotator_by_label(token: str, project: str, label: str,
 
 
 @st.experimental_memo(suppress_st_warning=True, show_spinner=False)
-def get_cached_project_by_label(token: str, label: str) -> ProjectBean:
-    if DEBUG:
+def get_cached_project_by_label(token: str, label: str, debug: bool = False) -> ProjectBean:
+    if debug:
         st.write("Cache miss: get_cached_project_by_label(", token, ",", label, ") ran")
     projects = get_cached_projects(token)
     for p in projects:

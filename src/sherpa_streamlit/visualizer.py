@@ -13,8 +13,6 @@ from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached
     get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label, get_client
 from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
 
-DEBUG = True
-
 # fmt: on
 FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](https://streamlit.io/) and [`sherpa-streamlit`](https://github.com/oterrier/sherpa_streamlit)</span>"""
 
@@ -35,6 +33,7 @@ def visualize(  # noqa: C901
         sidebar_title: Optional[str] = None,
         sidebar_description: Optional[str] = None,
         show_logo: bool = True,
+        debug: bool = False,
         color: Optional[str] = "#09A3D5",
         key: Optional[str] = None
 ) -> None:
@@ -88,31 +87,31 @@ def visualize(  # noqa: C901
     try:
         token = st.session_state.get('token', None)
         if token is not None:
-            if DEBUG:
+            if debug:
                 st.write("Calling get_cached_projects(", token, ")")
-            all_projects = get_cached_projects(token)
+            all_projects = get_cached_projects(token, debug=debug)
             selected_projects = sorted([p.label for p in all_projects if projects is None or p.name in projects])
             st.sidebar.selectbox(project_selector_title, selected_projects, key="project")
             if st.session_state.get('project', None) is not None:
-                if DEBUG:
+                if debug:
                     st.write("Calling get_cached_project_by_label(", token, ",", st.session_state.project, ")")
-                project: ProjectBean = get_cached_project_by_label(token, st.session_state.project)
+                project: ProjectBean = get_cached_project_by_label(token, st.session_state.project, debug=debug)
                 if sample_doc and project is not None:
-                    if DEBUG:
+                    if debug:
                         st.write("Calling get_cached_sample_doc(", token, ",", project.name, ")")
-                    sample = get_cached_sample_doc(token, project.name)
-                if DEBUG:
+                    sample = get_cached_sample_doc(token, project.name, debug=debug)
+                if debug:
                     st.write("Calling get_cached_annotators(", token, ",", project.name, ",",
                              tuple(annotator_types) if annotator_types is not None else None, ",",
                              favorite_only, ")")
                 all_annotators = get_cached_annotators(token, project.name,
                                                        tuple(annotator_types) if annotator_types is not None else None,
-                                                       favorite_only) if project is not None else []
+                                                       favorite_only, debug=debug) if project is not None else []
                 selected_annotators = sorted(
                     [p.label for p in all_annotators if annotators is None or p.name in annotators])
                 st.sidebar.selectbox(annotator_selector_title, selected_annotators, key="annotator")
                 if st.session_state.get('annotator', None) is not None:
-                    if DEBUG:
+                    if debug:
                         st.write("Calling get_cached_annotator_by_label(", token, ",", project.name, ",",
                                  st.session_state.annotator, ",",
                                  tuple(
@@ -121,7 +120,7 @@ def visualize(  # noqa: C901
                     annotator = get_cached_annotator_by_label(token, project.name, st.session_state.annotator,
                                                               tuple(
                                                                   annotator_types) if annotator_types is not None else None,
-                                                              favorite_only)
+                                                              favorite_only, debug=debug)
 
             if show_project or show_annotator:
                 colp, cola, = st.columns(2)
