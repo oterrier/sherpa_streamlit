@@ -48,21 +48,21 @@ def get_client(token: str):
     return StreamlitSherpaClient.from_token(token)
 
 
-@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24*3600)
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24 * 3600)
 def get_cached_projects(token: str, debug: bool = False) -> List[ProjectBean]:
     if debug:
         st.write("Cache miss: get_cached_projects(", token, ") ran")
     return get_client(token).get_projects()
 
 
-@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24*3600)
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24 * 3600)
 def get_cached_sample_doc(token: str, project: str, debug: bool = False) -> Document:
     if debug:
         st.write("Cache miss: get_cached_sample_doc(", token, ",", project, ") ran")
     return get_client(token).get_sample_doc(project)
 
 
-@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24*3600)
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24 * 3600)
 def get_cached_annotators(token: str, project: str, annotator_types: Tuple[str] = None,
                           favorite_only: bool = False, debug: bool = False):
     if debug:
@@ -71,7 +71,7 @@ def get_cached_annotators(token: str, project: str, annotator_types: Tuple[str] 
     return get_client(token).get_annotators(project, annotator_types, favorite_only)
 
 
-@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24*3600)
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24 * 3600)
 def get_cached_annotator_by_label(token: str, project: str, label: str,
                                   annotator_types: Tuple[str] = None,
                                   favorite_only: bool = False, debug: bool = False):
@@ -86,7 +86,7 @@ def get_cached_annotator_by_label(token: str, project: str, label: str,
     return None
 
 
-@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24*3600)
+@st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24 * 3600)
 def get_cached_project_by_label(token: str, label: str, debug: bool = False) -> ProjectBean:
     if debug:
         st.write("Cache miss: get_cached_project_by_label(", token, ",", label, ") ran")

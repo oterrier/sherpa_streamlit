@@ -12,10 +12,10 @@ from sherpa_client.api.documents import export_documents_sample
 from sherpa_client.api.labels import get_labels
 from sherpa_client.api.plans import get_plan
 from sherpa_client.api.projects import get_projects
+from sherpa_client.client import SherpaClient
 from sherpa_client.models import Credentials, RequestJwtTokenProjectAccessMode, AnnotatorMultimap, WithAnnotator, \
     AnnotateFormatBinaryWithPlanRefMultipartData, InputDocument, AnnotatedDocument, NamedAnnotationPlan, Label, \
     Document, ProjectBean, AnnotationPlan
-from sherpa_client.sherpa import SherpaClient
 from sherpa_client.types import File, Unset, UNSET, Response
 from streamlit.uploaded_file_manager import UploadedFile
 

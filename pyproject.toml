@@ -28,7 +28,7 @@ requires = [
     "openpyxl==3.0.7",
     "streamlit~=1.2.0",
     "st-annotated-text",
-    "sherpa-client==0.9.19",
+    "sherpa-client==0.9.20",
     "plac",
     "collections-extended>=1.0.2",
     "python-multipart",
