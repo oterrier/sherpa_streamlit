@@ -1,1 +1,1384 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="5" time="1.715" timestamp="2021-12-08T19:22:46.163574" hostname="OLI-OMEN"><testcase classname="examples.streamlit_app" name="FLAKE8" time="0.056" /><testcase classname="src.sherpa_streamlit.__init__" name="FLAKE8" time="0.043" /><testcase classname="src.sherpa_streamlit.sherpa" name="FLAKE8" time="1.302" /><testcase classname="src.sherpa_streamlit.util" name="FLAKE8" time="0.082" /><testcase classname="src.sherpa_streamlit.visualizer" name="FLAKE8" time="0.127" /></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="3" failures="0" skipped="0" tests="5" time="1.694" timestamp="2021-12-09T10:03:19.099753" hostname="OLI-OMEN"><testcase classname="examples.streamlit_app" name="FLAKE8" time="0.052" /><testcase classname="src.sherpa_streamlit.__init__" name="FLAKE8" time="0.048" /><testcase classname="src.sherpa_streamlit.sherpa" name="FLAKE8" time="1.072"><error message="failed on setup with &quot;_pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.&#10;Hint: make sure your test modules/packages have valid Python names.&#10;Traceback:&#10;../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module&#10;    return _bootstrap._gcd_import(name[level:], package, level)&#10;src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;&#10;    from .visualizer import visualize&#10;src/sherpa_streamlit/visualizer.py:14: in &lt;module&gt;&#10;    from .sherpa import StreamlitSherpaClient, ExtendedAnnotator&#10;src/sherpa_streamlit/sherpa.py:6: in &lt;module&gt;&#10;    from methodtools import lru_cache&#10;E   ModuleNotFoundError: No module named 'methodtools'&quot;">self = &lt;Package sherpa_streamlit&gt;
+
+    def _importtestmodule(self):
+        # We assume we are only called once per module.
+        importmode = self.config.getoption("--import-mode")
+        try:
+&gt;           mod = import_path(self.fspath, mode=importmode)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:578: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+p = local('/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py')
+
+    def import_path(
+        p: Union[str, py.path.local, Path],
+        *,
+        mode: Union[str, ImportMode] = ImportMode.prepend,
+    ) -&gt; ModuleType:
+        """Import and return a module from the given path, which can be a file (a module) or
+        a directory (a package).
+    
+        The import mechanism used is controlled by the `mode` parameter:
+    
+        * `mode == ImportMode.prepend`: the directory containing the module (or package, taking
+          `__init__.py` files into account) will be put at the *start* of `sys.path` before
+          being imported with `__import__.
+    
+        * `mode == ImportMode.append`: same as `prepend`, but the directory will be appended
+          to the end of `sys.path`, if not already in `sys.path`.
+    
+        * `mode == ImportMode.importlib`: uses more fine control mechanisms provided by `importlib`
+          to import the module, which avoids having to use `__import__` and muck with `sys.path`
+          at all. It effectively allows having same-named test modules in different places.
+    
+        :raises ImportPathMismatchError:
+            If after importing the given `path` and the module `__file__`
+            are different. Only raised in `prepend` and `append` modes.
+        """
+        mode = ImportMode(mode)
+    
+        path = Path(str(p))
+    
+        if not path.exists():
+            raise ImportError(path)
+    
+        if mode is ImportMode.importlib:
+            module_name = path.stem
+    
+            for meta_importer in sys.meta_path:
+                spec = meta_importer.find_spec(module_name, [str(path.parent)])
+                if spec is not None:
+                    break
+            else:
+                spec = importlib.util.spec_from_file_location(module_name, str(path))
+    
+            if spec is None:
+                raise ImportError(
+                    "Can't find module {} at location {}".format(module_name, str(path))
+                )
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)  # type: ignore[union-attr]
+            return mod
+    
+        pkg_path = resolve_package_path(path)
+        if pkg_path is not None:
+            pkg_root = pkg_path.parent
+            names = list(path.with_suffix("").relative_to(pkg_root).parts)
+            if names[-1] == "__init__":
+                names.pop()
+            module_name = ".".join(names)
+        else:
+            pkg_root = path.parent
+            module_name = path.stem
+    
+        # Change sys.path permanently: restoring it at the end of this function would cause surprising
+        # problems because of delayed imports: for example, a conftest.py file imported by this function
+        # might have local imports, which would fail at runtime if we restored sys.path.
+        if mode is ImportMode.append:
+            if str(pkg_root) not in sys.path:
+                sys.path.append(str(pkg_root))
+        elif mode is ImportMode.prepend:
+            if str(pkg_root) != sys.path[0]:
+                sys.path.insert(0, str(pkg_root))
+        else:
+            assert_never(mode)
+    
+&gt;       importlib.import_module(module_name)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/pathlib.py:524: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                msg = ("the 'package' argument is required to perform a relative "
+                       "import for {!r}")
+                raise TypeError(msg.format(name))
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+
+../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', package = None, level = 0
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:1014: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f677ff53430&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:991: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f677ff53430&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:975: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f67768fd7c0&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:671: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f67768fd7c0&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap_external&gt;:783: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = &lt;built-in function exec&gt;
+args = (&lt;code object &lt;module&gt; at 0x7f6776a6f190, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
+kwds = {}
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    "Kairntech Sherpa building blocks for Streamlit apps"
+    __version__ = "0.2.14"
+    
+&gt;   from .visualizer import visualize
+
+src/sherpa_streamlit/__init__.py:4: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from typing import List, Optional, Iterable, cast
+    import pandas as pd
+    import plac
+    import streamlit as st
+    import streamlit.components.v1 as components
+    from annotated_text import annotation
+    from collections_extended import RangeMap
+    from sherpa_client.models import AnnotatedDocument, ProjectBean
+    from sherpa_client.types import UNSET, File
+    from streamlit.uploaded_file_manager import UploadedFile
+    # fmt: off
+    from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached_projects, \
+        get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label, get_client
+&gt;   from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
+
+src/sherpa_streamlit/visualizer.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import json
+    from typing import Any, Dict, Type, TypeVar, Union
+    from typing import Tuple, Sequence, List
+    
+    import attr
+&gt;   from methodtools import lru_cache
+E   ModuleNotFoundError: No module named 'methodtools'
+
+src/sherpa_streamlit/sherpa.py:6: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, argname = 'item', firstresult = False
+
+    def __call__(self, *args, **kwargs):
+        if args:
+            raise TypeError("hook calling supports only keyword arguments")
+        assert not self.is_historic()
+    
+        # This is written to avoid expensive operations when not needed.
+        if self.spec:
+            for argname in self.spec.argnames:
+                if argname not in kwargs:
+                    notincall = tuple(set(self.spec.argnames) - kwargs.keys())
+                    warnings.warn(
+                        "Argument(s) {} which are declared in the hookspec "
+                        "can not be found in this hook call".format(notincall),
+                        stacklevel=2,
+                    )
+                    break
+    
+            firstresult = self.spec.opts.get("firstresult")
+        else:
+            firstresult = False
+    
+&gt;       return self._hookexec(self.name, self.get_hookimpls(), kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f677fe1b160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6776bbcdf0&gt;&gt;, ...]
+kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, firstresult = False
+
+    def _hookexec(self, hook_name, methods, kwargs, firstresult):
+        # called from all hookcaller instances.
+        # enable_tracing will set its own wrapping function at self._inner_hookexec
+&gt;       return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_manager.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = &lt;Flake8Item sherpa.py&gt;
+
+    def pytest_runtest_setup(item: Item) -&gt; None:
+        _update_current_test_var(item, "setup")
+&gt;       item.session._setupstate.prepare(item)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+                raise exc
+    
+        needed_collectors = colitem.listchain()
+        for col in needed_collectors[len(self.stack) :]:
+            self.stack.append(col)
+            try:
+                col.setup()
+            except TEST_OUTCOME as e:
+                col._prepare_exc = e  # type: ignore[attr-defined]
+&gt;               raise e
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:452: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+                raise exc
+    
+        needed_collectors = colitem.listchain()
+        for col in needed_collectors[len(self.stack) :]:
+            self.stack.append(col)
+            try:
+&gt;               col.setup()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def setup(self) -&gt; None:
+        # Not using fixtures to call setup_module here because autouse fixtures
+        # from packages are not called automatically (#4085).
+        setup_module = _get_first_non_fixture_func(
+&gt;           self.obj, ("setUpModule", "setup_module")
+        )
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:644: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    @property
+    def obj(self):
+        """Underlying Python object."""
+        obj = getattr(self, "_obj", None)
+        if obj is None:
+&gt;           self._obj = obj = self._getobj()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def _getobj(self):
+&gt;       return self._importtestmodule()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:500: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def _importtestmodule(self):
+        # We assume we are only called once per module.
+        importmode = self.config.getoption("--import-mode")
+        try:
+            mod = import_path(self.fspath, mode=importmode)
+        except SyntaxError as e:
+            raise self.CollectError(
+                ExceptionInfo.from_current().getrepr(style="short")
+            ) from e
+        except ImportPathMismatchError as e:
+            raise self.CollectError(
+                "import file mismatch:\n"
+                "imported module %r has this __file__ attribute:\n"
+                "  %s\n"
+                "which is not the same as the test file we want to collect:\n"
+                "  %s\n"
+                "HINT: remove __pycache__ / .pyc files and/or use a "
+                "unique basename for your test file modules" % e.args
+            ) from e
+        except ImportError as e:
+            exc_info = ExceptionInfo.from_current()
+            if self.config.getoption("verbose") &lt; 2:
+                exc_info.traceback = exc_info.traceback.filter(filter_traceback)
+            exc_repr = (
+                exc_info.getrepr(style="short")
+                if exc_info.traceback
+                else exc_info.exconly()
+            )
+            formatted_tb = str(exc_repr)
+&gt;           raise self.CollectError(
+                "ImportError while importing test module '{fspath}'.\n"
+                "Hint: make sure your test modules/packages have valid Python names.\n"
+                "Traceback:\n"
+                "{traceback}".format(fspath=self.fspath, traceback=formatted_tb)
+            ) from e
+E           _pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.
+E           Hint: make sure your test modules/packages have valid Python names.
+E           Traceback:
+E           ../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module
+E               return _bootstrap._gcd_import(name[level:], package, level)
+E           src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;
+E               from .visualizer import visualize
+E           src/sherpa_streamlit/visualizer.py:14: in &lt;module&gt;
+E               from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
+E           src/sherpa_streamlit/sherpa.py:6: in &lt;module&gt;
+E               from methodtools import lru_cache
+E           E   ModuleNotFoundError: No module named 'methodtools'
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:603: CollectError</error></testcase><testcase classname="src.sherpa_streamlit.util" name="FLAKE8" time="0.000"><error message="failed on setup with &quot;_pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.&#10;Hint: make sure your test modules/packages have valid Python names.&#10;Traceback:&#10;../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module&#10;    return _bootstrap._gcd_import(name[level:], package, level)&#10;src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;&#10;    from .visualizer import visualize&#10;src/sherpa_streamlit/visualizer.py:14: in &lt;module&gt;&#10;    from .sherpa import StreamlitSherpaClient, ExtendedAnnotator&#10;src/sherpa_streamlit/sherpa.py:6: in &lt;module&gt;&#10;    from methodtools import lru_cache&#10;E   ModuleNotFoundError: No module named 'methodtools'&quot;">self = &lt;Package sherpa_streamlit&gt;
+
+    def _importtestmodule(self):
+        # We assume we are only called once per module.
+        importmode = self.config.getoption("--import-mode")
+        try:
+&gt;           mod = import_path(self.fspath, mode=importmode)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:578: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+p = local('/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py')
+
+    def import_path(
+        p: Union[str, py.path.local, Path],
+        *,
+        mode: Union[str, ImportMode] = ImportMode.prepend,
+    ) -&gt; ModuleType:
+        """Import and return a module from the given path, which can be a file (a module) or
+        a directory (a package).
+    
+        The import mechanism used is controlled by the `mode` parameter:
+    
+        * `mode == ImportMode.prepend`: the directory containing the module (or package, taking
+          `__init__.py` files into account) will be put at the *start* of `sys.path` before
+          being imported with `__import__.
+    
+        * `mode == ImportMode.append`: same as `prepend`, but the directory will be appended
+          to the end of `sys.path`, if not already in `sys.path`.
+    
+        * `mode == ImportMode.importlib`: uses more fine control mechanisms provided by `importlib`
+          to import the module, which avoids having to use `__import__` and muck with `sys.path`
+          at all. It effectively allows having same-named test modules in different places.
+    
+        :raises ImportPathMismatchError:
+            If after importing the given `path` and the module `__file__`
+            are different. Only raised in `prepend` and `append` modes.
+        """
+        mode = ImportMode(mode)
+    
+        path = Path(str(p))
+    
+        if not path.exists():
+            raise ImportError(path)
+    
+        if mode is ImportMode.importlib:
+            module_name = path.stem
+    
+            for meta_importer in sys.meta_path:
+                spec = meta_importer.find_spec(module_name, [str(path.parent)])
+                if spec is not None:
+                    break
+            else:
+                spec = importlib.util.spec_from_file_location(module_name, str(path))
+    
+            if spec is None:
+                raise ImportError(
+                    "Can't find module {} at location {}".format(module_name, str(path))
+                )
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)  # type: ignore[union-attr]
+            return mod
+    
+        pkg_path = resolve_package_path(path)
+        if pkg_path is not None:
+            pkg_root = pkg_path.parent
+            names = list(path.with_suffix("").relative_to(pkg_root).parts)
+            if names[-1] == "__init__":
+                names.pop()
+            module_name = ".".join(names)
+        else:
+            pkg_root = path.parent
+            module_name = path.stem
+    
+        # Change sys.path permanently: restoring it at the end of this function would cause surprising
+        # problems because of delayed imports: for example, a conftest.py file imported by this function
+        # might have local imports, which would fail at runtime if we restored sys.path.
+        if mode is ImportMode.append:
+            if str(pkg_root) not in sys.path:
+                sys.path.append(str(pkg_root))
+        elif mode is ImportMode.prepend:
+            if str(pkg_root) != sys.path[0]:
+                sys.path.insert(0, str(pkg_root))
+        else:
+            assert_never(mode)
+    
+&gt;       importlib.import_module(module_name)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/pathlib.py:524: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                msg = ("the 'package' argument is required to perform a relative "
+                       "import for {!r}")
+                raise TypeError(msg.format(name))
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+
+../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', package = None, level = 0
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:1014: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f677ff53430&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:991: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f677ff53430&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:975: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f67768fd7c0&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:671: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f67768fd7c0&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap_external&gt;:783: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = &lt;built-in function exec&gt;
+args = (&lt;code object &lt;module&gt; at 0x7f6776a6f190, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
+kwds = {}
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    "Kairntech Sherpa building blocks for Streamlit apps"
+    __version__ = "0.2.14"
+    
+&gt;   from .visualizer import visualize
+
+src/sherpa_streamlit/__init__.py:4: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from typing import List, Optional, Iterable, cast
+    import pandas as pd
+    import plac
+    import streamlit as st
+    import streamlit.components.v1 as components
+    from annotated_text import annotation
+    from collections_extended import RangeMap
+    from sherpa_client.models import AnnotatedDocument, ProjectBean
+    from sherpa_client.types import UNSET, File
+    from streamlit.uploaded_file_manager import UploadedFile
+    # fmt: off
+    from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached_projects, \
+        get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label, get_client
+&gt;   from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
+
+src/sherpa_streamlit/visualizer.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import json
+    from typing import Any, Dict, Type, TypeVar, Union
+    from typing import Tuple, Sequence, List
+    
+    import attr
+&gt;   from methodtools import lru_cache
+E   ModuleNotFoundError: No module named 'methodtools'
+
+src/sherpa_streamlit/sherpa.py:6: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': &lt;Flake8Item util.py&gt;}, argname = 'item', firstresult = False
+
+    def __call__(self, *args, **kwargs):
+        if args:
+            raise TypeError("hook calling supports only keyword arguments")
+        assert not self.is_historic()
+    
+        # This is written to avoid expensive operations when not needed.
+        if self.spec:
+            for argname in self.spec.argnames:
+                if argname not in kwargs:
+                    notincall = tuple(set(self.spec.argnames) - kwargs.keys())
+                    warnings.warn(
+                        "Argument(s) {} which are declared in the hookspec "
+                        "can not be found in this hook call".format(notincall),
+                        stacklevel=2,
+                    )
+                    break
+    
+            firstresult = self.spec.opts.get("firstresult")
+        else:
+            firstresult = False
+    
+&gt;       return self._hookexec(self.name, self.get_hookimpls(), kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f677fe1b160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6776bbcdf0&gt;&gt;, ...]
+kwargs = {'item': &lt;Flake8Item util.py&gt;}, firstresult = False
+
+    def _hookexec(self, hook_name, methods, kwargs, firstresult):
+        # called from all hookcaller instances.
+        # enable_tracing will set its own wrapping function at self._inner_hookexec
+&gt;       return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_manager.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = &lt;Flake8Item util.py&gt;
+
+    def pytest_runtest_setup(item: Item) -&gt; None:
+        _update_current_test_var(item, "setup")
+&gt;       item.session._setupstate.prepare(item)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item util.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+&gt;               raise exc
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:443: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6776b77e50&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: "Callable[[], TResult]",
+        when: "Literal['collect', 'setup', 'call', 'teardown']",
+        reraise: Optional[
+            Union[Type[BaseException], Tuple[Type[BaseException], ...]]
+        ] = None,
+    ) -&gt; "CallInfo[TResult]":
+        excinfo = None
+        start = timing.time()
+        precise_start = timing.perf_counter()
+        try:
+&gt;           result: Optional[TResult] = func()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+&gt;       lambda: ihook(item=item, **kwds), when=when, reraise=reraise
+    )
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, argname = 'item', firstresult = False
+
+    def __call__(self, *args, **kwargs):
+        if args:
+            raise TypeError("hook calling supports only keyword arguments")
+        assert not self.is_historic()
+    
+        # This is written to avoid expensive operations when not needed.
+        if self.spec:
+            for argname in self.spec.argnames:
+                if argname not in kwargs:
+                    notincall = tuple(set(self.spec.argnames) - kwargs.keys())
+                    warnings.warn(
+                        "Argument(s) {} which are declared in the hookspec "
+                        "can not be found in this hook call".format(notincall),
+                        stacklevel=2,
+                    )
+                    break
+    
+            firstresult = self.spec.opts.get("firstresult")
+        else:
+            firstresult = False
+    
+&gt;       return self._hookexec(self.name, self.get_hookimpls(), kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f677fe1b160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6776bbcdf0&gt;&gt;, ...]
+kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, firstresult = False
+
+    def _hookexec(self, hook_name, methods, kwargs, firstresult):
+        # called from all hookcaller instances.
+        # enable_tracing will set its own wrapping function at self._inner_hookexec
+&gt;       return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_manager.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = &lt;Flake8Item sherpa.py&gt;
+
+    def pytest_runtest_setup(item: Item) -&gt; None:
+        _update_current_test_var(item, "setup")
+&gt;       item.session._setupstate.prepare(item)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+                raise exc
+    
+        needed_collectors = colitem.listchain()
+        for col in needed_collectors[len(self.stack) :]:
+            self.stack.append(col)
+            try:
+                col.setup()
+            except TEST_OUTCOME as e:
+                col._prepare_exc = e  # type: ignore[attr-defined]
+&gt;               raise e
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:452: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+                raise exc
+    
+        needed_collectors = colitem.listchain()
+        for col in needed_collectors[len(self.stack) :]:
+            self.stack.append(col)
+            try:
+&gt;               col.setup()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def setup(self) -&gt; None:
+        # Not using fixtures to call setup_module here because autouse fixtures
+        # from packages are not called automatically (#4085).
+        setup_module = _get_first_non_fixture_func(
+&gt;           self.obj, ("setUpModule", "setup_module")
+        )
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:644: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    @property
+    def obj(self):
+        """Underlying Python object."""
+        obj = getattr(self, "_obj", None)
+        if obj is None:
+&gt;           self._obj = obj = self._getobj()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def _getobj(self):
+&gt;       return self._importtestmodule()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:500: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def _importtestmodule(self):
+        # We assume we are only called once per module.
+        importmode = self.config.getoption("--import-mode")
+        try:
+            mod = import_path(self.fspath, mode=importmode)
+        except SyntaxError as e:
+            raise self.CollectError(
+                ExceptionInfo.from_current().getrepr(style="short")
+            ) from e
+        except ImportPathMismatchError as e:
+            raise self.CollectError(
+                "import file mismatch:\n"
+                "imported module %r has this __file__ attribute:\n"
+                "  %s\n"
+                "which is not the same as the test file we want to collect:\n"
+                "  %s\n"
+                "HINT: remove __pycache__ / .pyc files and/or use a "
+                "unique basename for your test file modules" % e.args
+            ) from e
+        except ImportError as e:
+            exc_info = ExceptionInfo.from_current()
+            if self.config.getoption("verbose") &lt; 2:
+                exc_info.traceback = exc_info.traceback.filter(filter_traceback)
+            exc_repr = (
+                exc_info.getrepr(style="short")
+                if exc_info.traceback
+                else exc_info.exconly()
+            )
+            formatted_tb = str(exc_repr)
+&gt;           raise self.CollectError(
+                "ImportError while importing test module '{fspath}'.\n"
+                "Hint: make sure your test modules/packages have valid Python names.\n"
+                "Traceback:\n"
+                "{traceback}".format(fspath=self.fspath, traceback=formatted_tb)
+            ) from e
+E           _pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.
+E           Hint: make sure your test modules/packages have valid Python names.
+E           Traceback:
+E           ../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module
+E               return _bootstrap._gcd_import(name[level:], package, level)
+E           src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;
+E               from .visualizer import visualize
+E           src/sherpa_streamlit/visualizer.py:14: in &lt;module&gt;
+E               from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
+E           src/sherpa_streamlit/sherpa.py:6: in &lt;module&gt;
+E               from methodtools import lru_cache
+E           E   ModuleNotFoundError: No module named 'methodtools'
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:603: CollectError</error></testcase><testcase classname="src.sherpa_streamlit.visualizer" name="FLAKE8" time="0.000"><error message="failed on setup with &quot;_pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.&#10;Hint: make sure your test modules/packages have valid Python names.&#10;Traceback:&#10;../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module&#10;    return _bootstrap._gcd_import(name[level:], package, level)&#10;src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;&#10;    from .visualizer import visualize&#10;src/sherpa_streamlit/visualizer.py:14: in &lt;module&gt;&#10;    from .sherpa import StreamlitSherpaClient, ExtendedAnnotator&#10;src/sherpa_streamlit/sherpa.py:6: in &lt;module&gt;&#10;    from methodtools import lru_cache&#10;E   ModuleNotFoundError: No module named 'methodtools'&quot;">self = &lt;Package sherpa_streamlit&gt;
+
+    def _importtestmodule(self):
+        # We assume we are only called once per module.
+        importmode = self.config.getoption("--import-mode")
+        try:
+&gt;           mod = import_path(self.fspath, mode=importmode)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:578: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+p = local('/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py')
+
+    def import_path(
+        p: Union[str, py.path.local, Path],
+        *,
+        mode: Union[str, ImportMode] = ImportMode.prepend,
+    ) -&gt; ModuleType:
+        """Import and return a module from the given path, which can be a file (a module) or
+        a directory (a package).
+    
+        The import mechanism used is controlled by the `mode` parameter:
+    
+        * `mode == ImportMode.prepend`: the directory containing the module (or package, taking
+          `__init__.py` files into account) will be put at the *start* of `sys.path` before
+          being imported with `__import__.
+    
+        * `mode == ImportMode.append`: same as `prepend`, but the directory will be appended
+          to the end of `sys.path`, if not already in `sys.path`.
+    
+        * `mode == ImportMode.importlib`: uses more fine control mechanisms provided by `importlib`
+          to import the module, which avoids having to use `__import__` and muck with `sys.path`
+          at all. It effectively allows having same-named test modules in different places.
+    
+        :raises ImportPathMismatchError:
+            If after importing the given `path` and the module `__file__`
+            are different. Only raised in `prepend` and `append` modes.
+        """
+        mode = ImportMode(mode)
+    
+        path = Path(str(p))
+    
+        if not path.exists():
+            raise ImportError(path)
+    
+        if mode is ImportMode.importlib:
+            module_name = path.stem
+    
+            for meta_importer in sys.meta_path:
+                spec = meta_importer.find_spec(module_name, [str(path.parent)])
+                if spec is not None:
+                    break
+            else:
+                spec = importlib.util.spec_from_file_location(module_name, str(path))
+    
+            if spec is None:
+                raise ImportError(
+                    "Can't find module {} at location {}".format(module_name, str(path))
+                )
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)  # type: ignore[union-attr]
+            return mod
+    
+        pkg_path = resolve_package_path(path)
+        if pkg_path is not None:
+            pkg_root = pkg_path.parent
+            names = list(path.with_suffix("").relative_to(pkg_root).parts)
+            if names[-1] == "__init__":
+                names.pop()
+            module_name = ".".join(names)
+        else:
+            pkg_root = path.parent
+            module_name = path.stem
+    
+        # Change sys.path permanently: restoring it at the end of this function would cause surprising
+        # problems because of delayed imports: for example, a conftest.py file imported by this function
+        # might have local imports, which would fail at runtime if we restored sys.path.
+        if mode is ImportMode.append:
+            if str(pkg_root) not in sys.path:
+                sys.path.append(str(pkg_root))
+        elif mode is ImportMode.prepend:
+            if str(pkg_root) != sys.path[0]:
+                sys.path.insert(0, str(pkg_root))
+        else:
+            assert_never(mode)
+    
+&gt;       importlib.import_module(module_name)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/pathlib.py:524: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                msg = ("the 'package' argument is required to perform a relative "
+                       "import for {!r}")
+                raise TypeError(msg.format(name))
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+&gt;       return _bootstrap._gcd_import(name[level:], package, level)
+
+../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', package = None, level = 0
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:1014: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f677ff53430&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:991: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sherpa_streamlit', import_ = &lt;function _gcd_import at 0x7f677ff53430&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:975: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = ModuleSpec(name='sherpa_streamlit', loader=&lt;_frozen_importlib_external.SourceFileLoader object at 0x7f67768fd7c0&gt;, ori...reamlit/__init__.py', submodule_search_locations=['/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit'])
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:671: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_frozen_importlib_external.SourceFileLoader object at 0x7f67768fd7c0&gt;, module = &lt;module 'sherpa_streamlit' from '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'&gt;
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap_external&gt;:783: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = &lt;built-in function exec&gt;
+args = (&lt;code object &lt;module&gt; at 0x7f6776a6f190, file "/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__in...for Streamlit apps', '__file__': '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py', ...})
+kwds = {}
+
+&gt;   ???
+
+&lt;frozen importlib._bootstrap&gt;:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    "Kairntech Sherpa building blocks for Streamlit apps"
+    __version__ = "0.2.14"
+    
+&gt;   from .visualizer import visualize
+
+src/sherpa_streamlit/__init__.py:4: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from typing import List, Optional, Iterable, cast
+    import pandas as pd
+    import plac
+    import streamlit as st
+    import streamlit.components.v1 as components
+    from annotated_text import annotation
+    from collections_extended import RangeMap
+    from sherpa_client.models import AnnotatedDocument, ProjectBean
+    from sherpa_client.types import UNSET, File
+    from streamlit.uploaded_file_manager import UploadedFile
+    # fmt: off
+    from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached_projects, \
+        get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label, get_client
+&gt;   from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
+
+src/sherpa_streamlit/visualizer.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import json
+    from typing import Any, Dict, Type, TypeVar, Union
+    from typing import Tuple, Sequence, List
+    
+    import attr
+&gt;   from methodtools import lru_cache
+E   ModuleNotFoundError: No module named 'methodtools'
+
+src/sherpa_streamlit/sherpa.py:6: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': &lt;Flake8Item visualizer.py&gt;}, argname = 'item', firstresult = False
+
+    def __call__(self, *args, **kwargs):
+        if args:
+            raise TypeError("hook calling supports only keyword arguments")
+        assert not self.is_historic()
+    
+        # This is written to avoid expensive operations when not needed.
+        if self.spec:
+            for argname in self.spec.argnames:
+                if argname not in kwargs:
+                    notincall = tuple(set(self.spec.argnames) - kwargs.keys())
+                    warnings.warn(
+                        "Argument(s) {} which are declared in the hookspec "
+                        "can not be found in this hook call".format(notincall),
+                        stacklevel=2,
+                    )
+                    break
+    
+            firstresult = self.spec.opts.get("firstresult")
+        else:
+            firstresult = False
+    
+&gt;       return self._hookexec(self.name, self.get_hookimpls(), kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f677fe1b160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6776bbcdf0&gt;&gt;, ...]
+kwargs = {'item': &lt;Flake8Item visualizer.py&gt;}, firstresult = False
+
+    def _hookexec(self, hook_name, methods, kwargs, firstresult):
+        # called from all hookcaller instances.
+        # enable_tracing will set its own wrapping function at self._inner_hookexec
+&gt;       return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_manager.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = &lt;Flake8Item visualizer.py&gt;
+
+    def pytest_runtest_setup(item: Item) -&gt; None:
+        _update_current_test_var(item, "setup")
+&gt;       item.session._setupstate.prepare(item)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item visualizer.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+&gt;               raise exc
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:443: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6742c5f430&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: "Callable[[], TResult]",
+        when: "Literal['collect', 'setup', 'call', 'teardown']",
+        reraise: Optional[
+            Union[Type[BaseException], Tuple[Type[BaseException], ...]]
+        ] = None,
+    ) -&gt; "CallInfo[TResult]":
+        excinfo = None
+        start = timing.time()
+        precise_start = timing.perf_counter()
+        try:
+&gt;           result: Optional[TResult] = func()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+&gt;       lambda: ihook(item=item, **kwds), when=when, reraise=reraise
+    )
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': &lt;Flake8Item util.py&gt;}, argname = 'item', firstresult = False
+
+    def __call__(self, *args, **kwargs):
+        if args:
+            raise TypeError("hook calling supports only keyword arguments")
+        assert not self.is_historic()
+    
+        # This is written to avoid expensive operations when not needed.
+        if self.spec:
+            for argname in self.spec.argnames:
+                if argname not in kwargs:
+                    notincall = tuple(set(self.spec.argnames) - kwargs.keys())
+                    warnings.warn(
+                        "Argument(s) {} which are declared in the hookspec "
+                        "can not be found in this hook call".format(notincall),
+                        stacklevel=2,
+                    )
+                    break
+    
+            firstresult = self.spec.opts.get("firstresult")
+        else:
+            firstresult = False
+    
+&gt;       return self._hookexec(self.name, self.get_hookimpls(), kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f677fe1b160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6776bbcdf0&gt;&gt;, ...]
+kwargs = {'item': &lt;Flake8Item util.py&gt;}, firstresult = False
+
+    def _hookexec(self, hook_name, methods, kwargs, firstresult):
+        # called from all hookcaller instances.
+        # enable_tracing will set its own wrapping function at self._inner_hookexec
+&gt;       return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_manager.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = &lt;Flake8Item util.py&gt;
+
+    def pytest_runtest_setup(item: Item) -&gt; None:
+        _update_current_test_var(item, "setup")
+&gt;       item.session._setupstate.prepare(item)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item util.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+&gt;               raise exc
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:443: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class '_pytest.runner.CallInfo'&gt;, func = &lt;function call_runtest_hook.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6776b77e50&gt;, when = 'setup', reraise = (&lt;class '_pytest.outcomes.Exit'&gt;, &lt;class 'KeyboardInterrupt'&gt;)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: "Callable[[], TResult]",
+        when: "Literal['collect', 'setup', 'call', 'teardown']",
+        reraise: Optional[
+            Union[Type[BaseException], Tuple[Type[BaseException], ...]]
+        ] = None,
+    ) -&gt; "CallInfo[TResult]":
+        excinfo = None
+        start = timing.time()
+        precise_start = timing.perf_counter()
+        try:
+&gt;           result: Optional[TResult] = func()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+&gt;       lambda: ihook(item=item, **kwds), when=when, reraise=reraise
+    )
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_HookCaller 'pytest_runtest_setup'&gt;, args = (), kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, argname = 'item', firstresult = False
+
+    def __call__(self, *args, **kwargs):
+        if args:
+            raise TypeError("hook calling supports only keyword arguments")
+        assert not self.is_historic()
+    
+        # This is written to avoid expensive operations when not needed.
+        if self.spec:
+            for argname in self.spec.argnames:
+                if argname not in kwargs:
+                    notincall = tuple(set(self.spec.argnames) - kwargs.keys())
+                    warnings.warn(
+                        "Argument(s) {} which are declared in the hookspec "
+                        "can not be found in this hook call".format(notincall),
+                        stacklevel=2,
+                    )
+                    break
+    
+            firstresult = self.spec.opts.get("firstresult")
+        else:
+            firstresult = False
+    
+&gt;       return self._hookexec(self.name, self.get_hookimpls(), kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_hooks.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.config.PytestPluginManager object at 0x7f677fe1b160&gt;, hook_name = 'pytest_runtest_setup'
+methods = [&lt;HookImpl plugin_name='nose', plugin=&lt;module '_pytest.nose' from '/home/olivier/dev/kairntech/sherpa_streamlit/.tox/p...=None&gt;&gt;, &lt;HookImpl plugin_name='logging-plugin', plugin=&lt;_pytest.logging.LoggingPlugin object at 0x7f6776bbcdf0&gt;&gt;, ...]
+kwargs = {'item': &lt;Flake8Item sherpa.py&gt;}, firstresult = False
+
+    def _hookexec(self, hook_name, methods, kwargs, firstresult):
+        # called from all hookcaller instances.
+        # enable_tracing will set its own wrapping function at self._inner_hookexec
+&gt;       return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+
+.tox/py38/lib/python3.8/site-packages/pluggy/_manager.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = &lt;Flake8Item sherpa.py&gt;
+
+    def pytest_runtest_setup(item: Item) -&gt; None:
+        _update_current_test_var(item, "setup")
+&gt;       item.session._setupstate.prepare(item)
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+                raise exc
+    
+        needed_collectors = colitem.listchain()
+        for col in needed_collectors[len(self.stack) :]:
+            self.stack.append(col)
+            try:
+                col.setup()
+            except TEST_OUTCOME as e:
+                col._prepare_exc = e  # type: ignore[attr-defined]
+&gt;               raise e
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:452: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.runner.SetupState object at 0x7f6776b7a910&gt;, colitem = &lt;Flake8Item sherpa.py&gt;
+
+    def prepare(self, colitem) -&gt; None:
+        """Setup objects along the collector chain to the test-method."""
+    
+        # Check if the last collection node has raised an error.
+        for col in self.stack:
+            if hasattr(col, "_prepare_exc"):
+                exc = col._prepare_exc  # type: ignore[attr-defined]
+                raise exc
+    
+        needed_collectors = colitem.listchain()
+        for col in needed_collectors[len(self.stack) :]:
+            self.stack.append(col)
+            try:
+&gt;               col.setup()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/runner.py:449: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def setup(self) -&gt; None:
+        # Not using fixtures to call setup_module here because autouse fixtures
+        # from packages are not called automatically (#4085).
+        setup_module = _get_first_non_fixture_func(
+&gt;           self.obj, ("setUpModule", "setup_module")
+        )
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:644: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    @property
+    def obj(self):
+        """Underlying Python object."""
+        obj = getattr(self, "_obj", None)
+        if obj is None:
+&gt;           self._obj = obj = self._getobj()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def _getobj(self):
+&gt;       return self._importtestmodule()
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:500: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Package sherpa_streamlit&gt;
+
+    def _importtestmodule(self):
+        # We assume we are only called once per module.
+        importmode = self.config.getoption("--import-mode")
+        try:
+            mod = import_path(self.fspath, mode=importmode)
+        except SyntaxError as e:
+            raise self.CollectError(
+                ExceptionInfo.from_current().getrepr(style="short")
+            ) from e
+        except ImportPathMismatchError as e:
+            raise self.CollectError(
+                "import file mismatch:\n"
+                "imported module %r has this __file__ attribute:\n"
+                "  %s\n"
+                "which is not the same as the test file we want to collect:\n"
+                "  %s\n"
+                "HINT: remove __pycache__ / .pyc files and/or use a "
+                "unique basename for your test file modules" % e.args
+            ) from e
+        except ImportError as e:
+            exc_info = ExceptionInfo.from_current()
+            if self.config.getoption("verbose") &lt; 2:
+                exc_info.traceback = exc_info.traceback.filter(filter_traceback)
+            exc_repr = (
+                exc_info.getrepr(style="short")
+                if exc_info.traceback
+                else exc_info.exconly()
+            )
+            formatted_tb = str(exc_repr)
+&gt;           raise self.CollectError(
+                "ImportError while importing test module '{fspath}'.\n"
+                "Hint: make sure your test modules/packages have valid Python names.\n"
+                "Traceback:\n"
+                "{traceback}".format(fspath=self.fspath, traceback=formatted_tb)
+            ) from e
+E           _pytest.nodes.Collector.CollectError: ImportError while importing test module '/home/olivier/dev/kairntech/sherpa_streamlit/src/sherpa_streamlit/__init__.py'.
+E           Hint: make sure your test modules/packages have valid Python names.
+E           Traceback:
+E           ../../../.pyenv/versions/3.8.2/lib/python3.8/importlib/__init__.py:127: in import_module
+E               return _bootstrap._gcd_import(name[level:], package, level)
+E           src/sherpa_streamlit/__init__.py:4: in &lt;module&gt;
+E               from .visualizer import visualize
+E           src/sherpa_streamlit/visualizer.py:14: in &lt;module&gt;
+E               from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
+E           src/sherpa_streamlit/sherpa.py:6: in &lt;module&gt;
+E               from methodtools import lru_cache
+E           E   ModuleNotFoundError: No module named 'methodtools'
+
+.tox/py38/lib/python3.8/site-packages/_pytest/python.py:603: CollectError</error></testcase></testsuite></testsuites>

@@ -3,6 +3,7 @@ from typing import Any, Dict, Type, TypeVar, Union
 from typing import Tuple, Sequence, List
 
 import attr
+from methodtools import lru_cache
 from multipart.multipart import parse_options_header
 from sherpa_client.api.annotate import annotate_format_binary_with_plan_ref, annotate_binary_with_plan_ref, \
     annotate_documents_with, \
@@ -146,6 +147,27 @@ class StreamlitSherpaClient:
     def from_token(token: str):
         return StreamlitSherpaClient.register.get(token, None)
 
+    def clear_cache(self):
+        self.get_projects.clear_cache()
+        self.get_project_by_label.clear_cache()
+        self.get_project_by_name.clear_cache()
+        self.get_annotators.clear_cache()
+        self.get_labels.clear_cache()
+        self.get_annotator_by_label.clear_cache()
+        self._get_plan.clear_cache()
+
+    def cache_info(self):
+        return {
+            self.get_projects.__qualname__: self.get_projects.cache_info(),
+            self.get_project_by_label.__qualname__: self.get_project_by_label.cache_info(),
+            self.get_project_by_name.__qualname__: self.get_project_by_name.cache_info(),
+            self.get_annotators.__qualname__: self.get_annotators.cache_info(),
+            self.get_labels.__qualname__: self.get_labels.cache_info(),
+            self.get_annotator_by_label.__qualname__: self.get_annotator_by_label.cache_info(),
+            self._get_plan.__qualname__: self._get_plan.cache_info()
+        }
+
+    @lru_cache()
     def get_projects(self) -> List[ProjectBean]:
         r = get_projects.sync_detailed(client=self.client)
         if r.is_success:
@@ -153,6 +175,7 @@ class StreamlitSherpaClient:
         else:
             r.raise_for_status()
 
+    @lru_cache()
     def get_project_by_label(self, label: str) -> ProjectBean:
         projects = self.get_projects()
         for p in projects:
@@ -160,6 +183,7 @@ class StreamlitSherpaClient:
                 return p
         return None
 
+    @lru_cache()
     def get_project_by_name(self, name: str) -> ProjectBean:
         projects = self.get_projects()
         for p in projects:
@@ -167,6 +191,7 @@ class StreamlitSherpaClient:
                 return p
         return None
 
+    @lru_cache()
     def get_sample_doc(self, project: Union[str, ProjectBean]) -> Document:
         pname = project.name if isinstance(project, ProjectBean) else project
         doc = None
@@ -177,6 +202,7 @@ class StreamlitSherpaClient:
             r.raise_for_status()
         return doc
 
+    @lru_cache()
     def get_annotators(self, project: Union[str, ProjectBean], annotator_types: Tuple[str] = None,
                        favorite_only: bool = False) -> List[ExtendedAnnotator]:
         pname = project.name if isinstance(project, ProjectBean) else project
@@ -211,6 +237,7 @@ class StreamlitSherpaClient:
             r.raise_for_status()
         return annotators
 
+    @lru_cache()
     def get_labels(self, project: Union[str, ProjectBean]) -> Dict[str, Label]:
         pname = project.name if isinstance(project, ProjectBean) else project
         r = get_labels.sync_detailed(pname, client=self.client)
@@ -221,6 +248,7 @@ class StreamlitSherpaClient:
                 labels[lab.name] = lab
         return labels
 
+    @lru_cache()
     def get_annotator_by_label(self, project: Union[str, ProjectBean], label: str, annotator_types: Tuple[str] = None,
                                favorite_only: bool = False) -> ExtendedAnnotator:
         pname = project.name if isinstance(project, ProjectBean) else project
@@ -230,6 +258,7 @@ class StreamlitSherpaClient:
                 return ann
         return None
 
+    @lru_cache()
     def _get_plan(self, project: Union[str, ProjectBean], name: str) -> NamedAnnotationPlan:
         pname = project.name if isinstance(project, ProjectBean) else project
         r = get_plan.sync_detailed(pname, name, client=self.client)
