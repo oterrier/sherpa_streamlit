@@ -136,7 +136,7 @@ class StreamlitSherpaClient:
         url = server[0:-1] if server.endswith('/') else server
         self.client = SherpaClient(base_url=f"{url}/api", verify_ssl=False, timeout=100)
         self.client.login_with_token(Credentials(email=user, password=password),
-                          project_access_mode=RequestJwtTokenProjectAccessMode.READ)
+                                     project_access_mode=RequestJwtTokenProjectAccessMode.READ)
         StreamlitSherpaClient.register[self.token] = self
 
     @property
