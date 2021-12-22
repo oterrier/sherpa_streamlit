@@ -211,7 +211,7 @@ def visualize(  # noqa: C901
                     if show_json:
                         with col2:
                             doc_exp = st.expander("Annotated doc (json)")
-                            doc_exp.json(doc)
+                            doc_exp.json(doc.to_dict())
                     visualize_annotated_doc(doc, annotator)
                 if formatted is not None:
                     col1, col2, = st.columns(2)
