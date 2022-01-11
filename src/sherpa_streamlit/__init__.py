@@ -1,4 +1,4 @@
 "Kairntech Sherpa building blocks for Streamlit apps"
-__version__ = "0.2.17"
+__version__ = "0.2.18"
 
 from .visualizer import visualize

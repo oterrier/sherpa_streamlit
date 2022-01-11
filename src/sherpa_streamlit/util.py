@@ -1,6 +1,6 @@
 import html
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 import streamlit as st
 from PIL import Image
@@ -87,7 +87,7 @@ def get_cached_annotator_by_label(token: str, project: str, label: str,
 
 
 @st.experimental_memo(suppress_st_warning=True, show_spinner=False, ttl=24 * 3600)
-def get_cached_project_by_label(token: str, label: str, debug: bool = False) -> ProjectBean:
+def get_cached_project_by_label(token: str, label: str, debug: bool = False) -> Optional[ProjectBean]:
     if debug:
         st.write("Cache miss: get_cached_project_by_label(", token, ",", label, ") ran")
     projects = get_cached_projects(token)
