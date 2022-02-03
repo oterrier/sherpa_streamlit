@@ -27,7 +27,7 @@ requires = [
     "pandas==1.2.3",
     "openpyxl==3.0.7",
     "streamlit~=1.2.0",
-    "st-annotated-text",
+    "st-annotated-text>=3.0.0",
     "sherpa-client==0.9.24",
     "collections-extended>=1.0.2",
     "python-multipart",

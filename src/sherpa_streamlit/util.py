@@ -4,19 +4,11 @@ from typing import Tuple, List, Optional
 
 import streamlit as st
 from PIL import Image
-from annotated_text import span, annotation
+from annotated_text import annotation
+from annotated_text.util import span, rem, div, em, px
 from bs4 import BeautifulSoup
-from htbuilder import H, styles, HtmlElement
-from htbuilder.units import unit
+from htbuilder import styles, HtmlElement
 from sherpa_client.models import Document, ProjectBean
-
-# Only works in 3.7+: from htbuilder import div, span
-
-div = H.div
-# Only works in 3.7+: from htbuilder.units import px, rem, em
-px = unit.px
-rem = unit.rem
-em = unit.em
 
 
 def ProjectBean_hash(self):
