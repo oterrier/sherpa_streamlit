@@ -247,9 +247,13 @@ def visualize_table(result: File,
         st.header(title)
     if result.mime_type == 'text/csv':
         df = pd.read_csv(result.payload)
+        st.dataframe(data=df)
     elif result.mime_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        df = pd.read_excel(result.payload)
-    st.dataframe(data=df)
+        with pd.ExcelFile(result.payload) as xls:
+            for sheet in xls.sheet_names:
+                df = pd.read_excel(xls, sheet)
+                st.subheader(sheet)
+                st.dataframe(data=df)
 
 
 def visualize_annotated_doc(
