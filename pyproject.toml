@@ -34,7 +34,8 @@ requires = [
     "Pillow",
     "plac",
     "bs4",
-    "methodtools"
+    "methodtools",
+    "shortuuid==1.0.8"
 ]
 dist-name = "sherpa-streamlit"
 

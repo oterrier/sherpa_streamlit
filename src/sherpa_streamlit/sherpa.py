@@ -1,22 +1,47 @@
 import json
+from time import sleep
 from typing import Any, Dict, Type, TypeVar, Union
 from typing import Tuple, Sequence, List
 
 import attr
+import shortuuid
 from methodtools import lru_cache
 from multipart.multipart import parse_options_header
-from sherpa_client.api.annotate import annotate_format_binary_with_plan_ref, annotate_binary_with_plan_ref, \
-    annotate_documents_with, \
-    annotate_format_documents_with_plan_ref, annotate_format_text_with_plan_ref, annotate_text_with
+from sherpa_client.api.annotate import (
+    annotate_format_binary_with_plan_ref,
+    annotate_binary_with_plan_ref,
+    annotate_documents_with,
+    annotate_format_documents_with_plan_ref,
+    annotate_format_text_with_plan_ref,
+    annotate_text_with,
+    annotate_corpus_with,
+)
 from sherpa_client.api.annotators import get_annotators_by_type
-from sherpa_client.api.documents import export_documents_sample
+from sherpa_client.api.documents import export_documents_sample, launch_document_import
+from sherpa_client.api.jobs import get_job
 from sherpa_client.api.labels import get_labels
 from sherpa_client.api.plans import get_plan
-from sherpa_client.api.projects import get_projects
+from sherpa_client.api.projects import get_projects, create_project
 from sherpa_client.client import SherpaClient
-from sherpa_client.models import Credentials, RequestJwtTokenProjectAccessMode, AnnotatorMultimap, WithAnnotator, \
-    AnnotateFormatBinaryWithPlanRefMultipartData, InputDocument, AnnotatedDocument, NamedAnnotationPlan, Label, \
-    Document, ProjectBean, AnnotationPlan
+from sherpa_client.models import (
+    Credentials,
+    RequestJwtTokenProjectAccessMode,
+    AnnotatorMultimap,
+    WithAnnotator,
+    AnnotateFormatBinaryWithPlanRefMultipartData,
+    InputDocument,
+    AnnotatedDocument,
+    NamedAnnotationPlan,
+    Label,
+    Document,
+    ProjectBean,
+    AnnotationPlan,
+    SherpaJobBean,
+    SherpaJobBeanStatus,
+    ProjectConfigCreation,
+    ProjectStatus,
+    LaunchDocumentImportMultipartData,
+)
 from sherpa_client.types import File, Unset, UNSET, Response
 from streamlit.uploaded_file_manager import UploadedFile
 
@@ -26,6 +51,7 @@ T = TypeVar("T", bound="ExtendedAnnotator")
 @attr.s(auto_attribs=True)
 class ExtendedAnnotator:
     """ """
+
     name: str
     label: str
     type: str
@@ -132,16 +158,31 @@ class ExtendedAnnotator:
 class StreamlitSherpaClient:
     register = {}
 
-    def __init__(self, server: str, user: str, password: str, **kawargs):
-        url = server[0:-1] if server.endswith('/') else server
+    def __init__(
+        self, server: str, user: str, password: str, use_token=True, **kawargs
+    ):
+        url = server[0:-1] if server.endswith("/") else server
         self.client = SherpaClient(base_url=f"{url}/api", verify_ssl=False, timeout=100)
-        self.client.login_with_token(Credentials(email=user, password=password),
-                                     project_access_mode=RequestJwtTokenProjectAccessMode.READ)
+        self.use_token = use_token
+        if use_token:
+            self.client.login_with_token(
+                Credentials(email=user, password=password),
+                project_access_mode=RequestJwtTokenProjectAccessMode.READ,
+            )
+        else:
+            self.client.login_with_cookie(Credentials(email=user, password=password))
         StreamlitSherpaClient.register[self.token] = self
 
     @property
     def token(self):
-        return self.client.token
+        if self.use_token:
+            return self.client.token
+        elif (
+            self.client.session_cookies is not None
+            and "vertx-web.session" in self.client.session_cookies
+        ):
+            return self.client.session_cookies["vertx-web.session"]
+        return None
 
     @staticmethod
     def from_token(token: str):
@@ -164,7 +205,7 @@ class StreamlitSherpaClient:
             self.get_annotators.__qualname__: self.get_annotators.cache_info(),
             self.get_labels.__qualname__: self.get_labels.cache_info(),
             self.get_annotator_by_label.__qualname__: self.get_annotator_by_label.cache_info(),
-            self._get_plan.__qualname__: self._get_plan.cache_info()
+            self._get_plan.__qualname__: self._get_plan.cache_info(),
         }
 
     @lru_cache()
@@ -195,7 +236,9 @@ class StreamlitSherpaClient:
     def get_sample_doc(self, project: Union[str, ProjectBean]) -> Document:
         pname = project.name if isinstance(project, ProjectBean) else project
         doc = None
-        r = export_documents_sample.sync_detailed(pname, sample_size=1, client=self.client)
+        r = export_documents_sample.sync_detailed(
+            pname, sample_size=1, client=self.client
+        )
         if r.is_success:
             doc = r.parsed[0]
         else:
@@ -203,8 +246,12 @@ class StreamlitSherpaClient:
         return doc
 
     @lru_cache()
-    def get_annotators(self, project: Union[str, ProjectBean], annotator_types: Tuple[str] = None,
-                       favorite_only: bool = False) -> List[ExtendedAnnotator]:
+    def get_annotators(
+        self,
+        project: Union[str, ProjectBean],
+        annotator_types: Tuple[str] = None,
+        favorite_only: bool = False,
+    ) -> List[ExtendedAnnotator]:
         pname = project.name if isinstance(project, ProjectBean) else project
         # st.write("get_annotators(", project, ", ", annotator_types,", ", favorite_only, ")")
         r = get_annotators_by_type.sync_detailed(pname, client=self.client)
@@ -217,20 +264,29 @@ class StreamlitSherpaClient:
                         if not favorite_only or annotator.favorite:
                             all_labels = {}
                             ann = annotator.to_dict()
-                            ann['type'] = type
-                            if type == 'plan':
-                                plan: NamedAnnotationPlan = self._get_plan(pname, annotator.name)
+                            ann["type"] = type
+                            if type == "plan":
+                                plan: NamedAnnotationPlan = self._get_plan(
+                                    pname, annotator.name
+                                )
                                 if plan is not None:
                                     definition = plan.parameters
                                     for step in definition.pipeline:
                                         # st.write("get_annotator_by_label(", server, ", ", project, ", ", label, "): step=", str(step))
-                                        if isinstance(step, WithAnnotator) and step.project_name != project:
-                                            step_labels = self.get_labels(step.project_name)
+                                        if (
+                                            isinstance(step, WithAnnotator)
+                                            and step.project_name != project
+                                        ):
+                                            step_labels = self.get_labels(
+                                                step.project_name
+                                            )
                                             all_labels.update(step_labels)
                                     ann.update(plan.to_dict())
                             project_labels = self.get_labels(pname)
                             all_labels.update(project_labels)
-                            ext_ann: ExtendedAnnotator = ExtendedAnnotator.from_dict(ann)
+                            ext_ann: ExtendedAnnotator = ExtendedAnnotator.from_dict(
+                                ann
+                            )
                             ext_ann.labels = all_labels
                             annotators.append(ext_ann)
         else:
@@ -249,8 +305,13 @@ class StreamlitSherpaClient:
         return labels
 
     @lru_cache()
-    def get_annotator_by_label(self, project: Union[str, ProjectBean], label: str, annotator_types: Tuple[str] = None,
-                               favorite_only: bool = False) -> ExtendedAnnotator:
+    def get_annotator_by_label(
+        self,
+        project: Union[str, ProjectBean],
+        label: str,
+        annotator_types: Tuple[str] = None,
+        favorite_only: bool = False,
+    ) -> ExtendedAnnotator:
         pname = project.name if isinstance(project, ProjectBean) else project
         annotators = self.get_annotators(pname, annotator_types, favorite_only)
         for ann in annotators:
@@ -259,7 +320,9 @@ class StreamlitSherpaClient:
         return None
 
     @lru_cache()
-    def _get_plan(self, project: Union[str, ProjectBean], name: str) -> NamedAnnotationPlan:
+    def _get_plan(
+        self, project: Union[str, ProjectBean], name: str
+    ) -> NamedAnnotationPlan:
         pname = project.name if isinstance(project, ProjectBean) else project
         r = get_plan.sync_detailed(pname, name, client=self.client)
         if r.is_success:
@@ -267,14 +330,20 @@ class StreamlitSherpaClient:
         else:
             r.raise_for_status()
 
-    def annotate_text(self, project: Union[str, ProjectBean], annotator: Union[str, ExtendedAnnotator],
-                      text: str) -> AnnotatedDocument:
+    def annotate_text(
+        self,
+        project: Union[str, ProjectBean],
+        annotator: Union[str, ExtendedAnnotator],
+        text: str,
+    ) -> AnnotatedDocument:
         pname = project.name if isinstance(project, ProjectBean) else project
-        aname = annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        aname = (
+            annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        )
         long_client = self.client.with_timeout(1000)
-        r = annotate_text_with.sync_detailed(pname, aname,
-                                             text_body=text,
-                                             client=long_client)
+        r = annotate_text_with.sync_detailed(
+            pname, aname, text_body=text, client=long_client
+        )
         # r = annotate_documents_with.sync_detailed(pname, aname,
         #                                           json_body=[InputDocument(text=text)],
         #                                           client=self.client)
@@ -287,22 +356,30 @@ class StreamlitSherpaClient:
     @staticmethod
     def _file_from_response(r: Response):
         file: File = r.parsed
-        file.mime_type = r.headers.get('Content-Type', 'application/octet-stream')
-        if 'Content-Disposition' in r.headers:
-            content_type, content_parameters = parse_options_header(r.headers['Content-Disposition'])
+        file.mime_type = r.headers.get("Content-Type", "application/octet-stream")
+        if "Content-Disposition" in r.headers:
+            content_type, content_parameters = parse_options_header(
+                r.headers["Content-Disposition"]
+            )
             # file.mime_type = content_type
-            if b'filename' in content_parameters:
-                file.file_name = content_parameters[b'filename'].decode("utf-8")
+            if b"filename" in content_parameters:
+                file.file_name = content_parameters[b"filename"].decode("utf-8")
         return file
 
-    def annotate_format_text(self, project: Union[str, ProjectBean], annotator: Union[str, ExtendedAnnotator],
-                             text: str) -> File:
+    def annotate_format_text(
+        self,
+        project: Union[str, ProjectBean],
+        annotator: Union[str, ExtendedAnnotator],
+        text: str,
+    ) -> File:
         pname = project.name if isinstance(project, ProjectBean) else project
-        aname = annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        aname = (
+            annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        )
         long_client = self.client.with_timeout(1000)
-        r = annotate_format_text_with_plan_ref.sync_detailed(pname, aname,
-                                                             text_body=text,
-                                                             client=long_client)
+        r = annotate_format_text_with_plan_ref.sync_detailed(
+            pname, aname, text_body=text, client=long_client
+        )
         # r = annotate_format_documents_with_plan_ref.sync_detailed(pname, aname,
         #                                                           json_body=[InputDocument(text=text)],
         #                                                           client=self.client)
@@ -311,32 +388,54 @@ class StreamlitSherpaClient:
         else:
             r.raise_for_status()
 
-    def annotate_binary(self, project: Union[str, ProjectBean], annotator: Union[str, ExtendedAnnotator],
-                        datafile: UploadedFile) -> List[AnnotatedDocument]:
+    def annotate_binary(
+        self,
+        project: Union[str, ProjectBean],
+        annotator: Union[str, ExtendedAnnotator],
+        datafile: UploadedFile,
+    ) -> List[AnnotatedDocument]:
         pname = project.name if isinstance(project, ProjectBean) else project
-        aname = annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        aname = (
+            annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        )
         files = AnnotateFormatBinaryWithPlanRefMultipartData(
-            file=File(file_name=datafile.name, payload=datafile.getvalue(), mime_type=datafile.type))
+            file=File(
+                file_name=datafile.name,
+                payload=datafile.getvalue(),
+                mime_type=datafile.type,
+            )
+        )
         long_client = self.client.with_timeout(1000)
-        r = annotate_binary_with_plan_ref.sync_detailed(pname, aname,
-                                                        multipart_data=files,
-                                                        client=long_client)
+        r = annotate_binary_with_plan_ref.sync_detailed(
+            pname, aname, multipart_data=files, client=long_client
+        )
         if r.is_success:
             docs = r.parsed
         else:
             r.raise_for_status()
         return docs
 
-    def annotate_format_binary(self, project: Union[str, ProjectBean], annotator: Union[str, ExtendedAnnotator],
-                               datafile: UploadedFile) -> File:
+    def annotate_format_binary(
+        self,
+        project: Union[str, ProjectBean],
+        annotator: Union[str, ExtendedAnnotator],
+        datafile: UploadedFile,
+    ) -> File:
         pname = project.name if isinstance(project, ProjectBean) else project
-        aname = annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        aname = (
+            annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        )
         files = AnnotateFormatBinaryWithPlanRefMultipartData(
-            file=File(file_name=datafile.name, payload=datafile.getvalue(), mime_type=datafile.type))
+            file=File(
+                file_name=datafile.name,
+                payload=datafile.getvalue(),
+                mime_type=datafile.type,
+            )
+        )
         long_client = self.client.with_timeout(1000)
-        r = annotate_format_binary_with_plan_ref.sync_detailed(pname, aname,
-                                                               multipart_data=files,
-                                                               client=long_client)
+        r = annotate_format_binary_with_plan_ref.sync_detailed(
+            pname, aname, multipart_data=files, client=long_client
+        )
         if r.is_success:
             return self._file_from_response(r)
         else:
@@ -367,34 +466,131 @@ class StreamlitSherpaClient:
         #                     del ann[ka]
         return documents
 
-    def annotate_json(self, project: Union[str, ProjectBean], annotator: Union[str, ExtendedAnnotator],
-                      datafile: UploadedFile) -> List[AnnotatedDocument]:
+    def annotate_json(
+        self,
+        project: Union[str, ProjectBean],
+        annotator: Union[str, ExtendedAnnotator],
+        datafile: UploadedFile,
+    ) -> List[AnnotatedDocument]:
         pname = project.name if isinstance(project, ProjectBean) else project
-        aname = annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
-        documents = [InputDocument.from_dict(doc) for doc in self.documents_from_file(datafile)]
+        aname = (
+            annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        )
+        documents = [
+            InputDocument.from_dict(doc) for doc in self.documents_from_file(datafile)
+        ]
         long_client = self.client.with_timeout(1000)
-        r = annotate_documents_with.sync_detailed(pname, aname,
-                                                  json_body=documents,
-                                                  client=long_client)
+        r = annotate_documents_with.sync_detailed(
+            pname, aname, json_body=documents, client=long_client
+        )
         if r.is_success:
             docs = r.parsed
         else:
             r.raise_for_status()
         return docs
 
-    def annotate_format_json(self, project: Union[str, ProjectBean], annotator: Union[str, ExtendedAnnotator],
-                             datafile: UploadedFile) -> File:
+    def annotate_format_json(
+        self,
+        project: Union[str, ProjectBean],
+        annotator: Union[str, ExtendedAnnotator],
+        datafile: UploadedFile,
+    ) -> File:
         pname = project.name if isinstance(project, ProjectBean) else project
-        aname = annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
-        documents = [InputDocument.from_dict(doc) for doc in self.documents_from_file(datafile)]
+        aname = (
+            annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        )
+        documents = [
+            InputDocument.from_dict(doc) for doc in self.documents_from_file(datafile)
+        ]
         long_client = self.client.with_timeout(1000)
-        r = annotate_format_documents_with_plan_ref.sync_detailed(pname, aname,
-                                                                  json_body=documents,
-                                                                  client=long_client)
+        r = annotate_format_documents_with_plan_ref.sync_detailed(
+            pname, aname, json_body=documents, client=long_client
+        )
         if r.is_success:
             return self._file_from_response(r)
         else:
             r.raise_for_status()
+
+    def create_project(
+        self,
+        label: str,
+        prefix: str = "test",
+        description: str = None,
+        nature: str = "sequence_labelling",
+    ):
+        shortuuid.set_alphabet("123456789abcdefghijkmnopqrstuvwxyz_")
+        pname = f"{prefix}_" + shortuuid.uuid()[: (16 - len(prefix))]
+        r = create_project.sync_detailed(
+            client=self.client,
+            json_body=ProjectConfigCreation(
+                name=pname, label=label, description=description, nature=nature
+            ),
+        )
+        # setup_stuff
+        if r.is_success:
+            project_status: ProjectStatus = r.parsed
+            job_bean = self.wait_for_completion(project_status.pending_job)
+            if project_status.status == "created" or self.is_success(job_bean):
+                yield project_status.project_name
+
+    def import_documents(self, project, datafile: UploadedFile):
+        multipart_data = LaunchDocumentImportMultipartData(
+            file=File(
+                file_name=datafile.name,
+                payload=datafile.getvalue(),
+                mime_type=datafile.type,
+            )
+        )
+        r = launch_document_import.sync_detailed(
+            project, client=self.client, multipart_data=multipart_data
+        )
+        if r.is_success:
+            job_bean: SherpaJobBean = r.parsed
+            job_bean = self.wait_for_completion(job_bean)
+            if self.is_success(job_bean):
+                return job_bean.status_message
+
+    def annotate_corpus(
+        self,
+        project: Union[str, ProjectBean],
+        annotator: Union[str, ExtendedAnnotator],
+        annotator_project: Union[str, ProjectBean],
+    ):
+        pname = project.name if isinstance(project, ProjectBean) else project
+        apname = (
+            annotator_project.name
+            if isinstance(annotator_project, ProjectBean)
+            else annotator_project
+        )
+        aname = (
+            annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
+        )
+        r = annotate_corpus_with.sync_detailed(
+            pname, aname, client=self.client, annotator_project=apname
+        )
+        if r.is_success:
+            job_bean: SherpaJobBean = r.parsed
+            job_bean = self.wait_for_completion(job_bean)
+            if self.is_success(job_bean):
+                return job_bean.status_message
+
+    @staticmethod
+    def is_success(job_bean):
+        return job_bean and job_bean.status == SherpaJobBeanStatus.COMPLETED
+
+    def wait_for_completion(self, job_bean: SherpaJobBean):
+        if job_bean:
+            while job_bean.status not in [
+                SherpaJobBeanStatus.COMPLETED,
+                SherpaJobBeanStatus.CANCELLED,
+                SherpaJobBeanStatus.FAILED,
+            ]:
+                sleep(10)
+                job_bean = get_job.sync(
+                    job_bean.project, job_bean.id, client=self.client
+                )
+        return job_bean
+
 
 # def main():
 #     url_input = "https://sherpa-sandbox.kairntech.com/"
