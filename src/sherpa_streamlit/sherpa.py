@@ -580,8 +580,9 @@ class StreamlitSherpaClient:
         if r.is_success:
             job_bean: SherpaJobBean = r.parsed
             job_bean = self.wait_for_completion(job_bean)
-            if self.is_success(job_bean):
-                return job_bean.status_message
+            return job_bean
+        else:
+            r.raise_for_status()
 
     def annotate_corpus(
         self,
@@ -604,8 +605,9 @@ class StreamlitSherpaClient:
         if r.is_success:
             job_bean: SherpaJobBean = r.parsed
             job_bean = self.wait_for_completion(job_bean)
-            if self.is_success(job_bean):
-                return job_bean.status_message
+            return job_bean
+        else:
+            r.raise_for_status()
 
     @staticmethod
     def is_success(job_bean):
