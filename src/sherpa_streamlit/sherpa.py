@@ -41,6 +41,7 @@ from sherpa_client.models import (
     ProjectConfigCreation,
     ProjectStatus,
     LaunchDocumentImportMultipartData, AnnotateBinaryForm, Converter, ConvertAnnotationPlan,
+    LaunchDocumentImportSegmentationPolicy,
 )
 from sherpa_client.types import File, Unset, UNSET, Response
 from streamlit.uploaded_file_manager import UploadedFile
@@ -569,7 +570,11 @@ class StreamlitSherpaClient:
         else:
             r.raise_for_status()
 
-    def import_documents(self, project, datafile: UploadedFile, wait_for_completion: bool = False):
+    def import_documents(self, project, datafile: UploadedFile,
+                         ignore_labelling=False,
+                         segmentation_policy="compute_if_missing",
+                         split_corpus=False,
+                         wait_for_completion: bool = False):
         multipart_data = LaunchDocumentImportMultipartData(
             file=File(
                 file_name=datafile.name,
@@ -578,7 +583,10 @@ class StreamlitSherpaClient:
             )
         )
         r = launch_document_import.sync_detailed(
-            project, client=self.client, multipart_data=multipart_data
+            project, client=self.client, multipart_data=multipart_data,
+            ignore_labelling= ignore_labelling,
+            segmentation_policy=segmentation_policy,
+            split_corpus= split_corpus
         )
         if r.is_success:
             job_bean: SherpaJobBean = r.parsed
