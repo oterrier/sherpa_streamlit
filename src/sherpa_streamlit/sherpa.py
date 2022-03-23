@@ -566,7 +566,7 @@ class StreamlitSherpaClient:
             if project_status.status == "created" or self.is_success(job_bean):
                 yield project_status.project_name
 
-    def import_documents(self, project, datafile: UploadedFile):
+    def import_documents(self, project, datafile: UploadedFile, wait_for_completion: bool = False):
         multipart_data = LaunchDocumentImportMultipartData(
             file=File(
                 file_name=datafile.name,
@@ -579,7 +579,8 @@ class StreamlitSherpaClient:
         )
         if r.is_success:
             job_bean: SherpaJobBean = r.parsed
-            job_bean = self.wait_for_completion(job_bean)
+            if wait_for_completion:
+                job_bean = self.wait_for_completion(job_bean)
             return job_bean
         else:
             r.raise_for_status()
@@ -589,6 +590,7 @@ class StreamlitSherpaClient:
         project: Union[str, ProjectBean],
         annotator: Union[str, ExtendedAnnotator],
         annotator_project: Union[str, ProjectBean],
+        wait_for_completion: bool = False
     ):
         pname = project.name if isinstance(project, ProjectBean) else project
         apname = (
@@ -604,7 +606,8 @@ class StreamlitSherpaClient:
         )
         if r.is_success:
             job_bean: SherpaJobBean = r.parsed
-            job_bean = self.wait_for_completion(job_bean)
+            if wait_for_completion:
+                job_bean = self.wait_for_completion(job_bean)
             return job_bean
         else:
             r.raise_for_status()
