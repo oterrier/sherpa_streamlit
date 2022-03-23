@@ -585,7 +585,7 @@ class StreamlitSherpaClient:
         r = launch_document_import.sync_detailed(
             project, client=self.client, multipart_data=multipart_data,
             ignore_labelling= ignore_labelling,
-            segmentation_policy=LaunchDocumentImportSegmentationPolicy[segmentation_policy],
+            segmentation_policy=LaunchDocumentImportSegmentationPolicy(segmentation_policy),
             split_corpus= split_corpus
         )
         if r.is_success:
