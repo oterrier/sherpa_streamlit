@@ -11,6 +11,7 @@ from sherpa_client.types import UNSET, File
 from streamlit.uploaded_file_manager import UploadedFile
 
 from .sherpa import StreamlitSherpaClient, ExtendedAnnotator
+
 # fmt: off
 from .util import LOGO, annotated_text, clean_html, clean_annotation, get_cached_projects, \
     get_cached_sample_doc, get_cached_annotators, get_cached_annotator_by_label, get_cached_project_by_label, get_client
@@ -20,27 +21,27 @@ FOOTER = """<span style="font-size: 0.75em">&hearts; Built with [Streamlit](http
 
 
 def visualize(  # noqa: C901
-        default_text: str = "",
-        projects: List[str] = None,
-        annotators: List[str] = None,
-        annotator_types: Iterable[str] = None,
-        favorite_only: bool = False,
-        sample_doc: bool = True,
-        show_connection: bool = True,
-        authenticate_with_token=True,
-        show_project: bool = False,
-        show_annotator: bool = False,
-        show_json: bool = False,
-        project_selector_title: str = "Select project",
-        annotator_selector_title: str = "Select annotator",
-        sidebar_title: Optional[str] = None,
-        sidebar_description: Optional[str] = None,
-        page_title: Optional[str] = None,
-        page_description: Optional[str] = None,
-        show_logo: bool = True,
-        debug: bool = False,
-        color: Optional[str] = "#09A3D5",
-        key: Optional[str] = None,
+    default_text: str = "",
+    projects: List[str] = None,
+    annotators: List[str] = None,
+    annotator_types: Iterable[str] = None,
+    favorite_only: bool = False,
+    sample_doc: bool = True,
+    show_connection: bool = True,
+    authenticate_with_token=True,
+    show_project: bool = False,
+    show_annotator: bool = False,
+    show_json: bool = False,
+    project_selector_title: str = "Select project",
+    annotator_selector_title: str = "Select annotator",
+    sidebar_title: Optional[str] = None,
+    sidebar_description: Optional[str] = None,
+    page_title: Optional[str] = None,
+    page_description: Optional[str] = None,
+    show_logo: bool = True,
+    debug: bool = False,
+    color: Optional[str] = "#09A3D5",
+    key: Optional[str] = None,
 ) -> None:
     """Embed the full visualizer with selected components."""
     try:
