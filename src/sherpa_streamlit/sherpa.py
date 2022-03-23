@@ -14,7 +14,7 @@ from sherpa_client.api.annotate import (
     annotate_format_documents_with_plan_ref,
     annotate_format_text_with_plan_ref,
     annotate_text_with,
-    annotate_corpus_with,
+    annotate_corpus_with, annotate_binary,
 )
 from sherpa_client.api.annotators import get_annotators_by_type
 from sherpa_client.api.documents import export_documents_sample, launch_document_import
@@ -40,7 +40,7 @@ from sherpa_client.models import (
     SherpaJobBeanStatus,
     ProjectConfigCreation,
     ProjectStatus,
-    LaunchDocumentImportMultipartData,
+    LaunchDocumentImportMultipartData, AnnotateBinaryForm, Converter, ConvertAnnotationPlan,
 )
 from sherpa_client.types import File, Unset, UNSET, Response
 from streamlit.uploaded_file_manager import UploadedFile
@@ -440,6 +440,39 @@ class StreamlitSherpaClient:
             return self._file_from_response(r)
         else:
             r.raise_for_status()
+
+    def convert_binary(
+        self,
+        converter: str,
+        parameters: dict,
+        datafile: UploadedFile,
+    ) -> List[AnnotatedDocument]:
+
+        plan = ConvertAnnotationPlan.from_dict({
+            "converter": {
+                "name": converter,
+                "parameters": parameters
+            },
+            "pipeline": [
+            ]
+        })
+        files = AnnotateBinaryForm(
+            file=File(
+                file_name=datafile.name,
+                payload=datafile.getvalue(),
+                mime_type=datafile.type,
+            ),
+            plan=plan
+        )
+        long_client = self.client.with_timeout(1000)
+        r = annotate_binary.sync_detailed(
+            multipart_data=files, client=long_client
+        )
+        if r.is_success:
+            docs = r.parsed
+        else:
+            r.raise_for_status()
+        return docs
 
     @staticmethod
     def documents_from_file(datafile: UploadedFile):

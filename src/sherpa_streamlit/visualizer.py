@@ -114,78 +114,42 @@ def visualize(  # noqa: C901
                     if projects is None or p.name in projects
                 ]
             )
-            st.sidebar.selectbox(
-                project_selector_title, selected_projects, key="project"
-            )
-            if st.session_state.get("project", None) is not None:
-                if debug:
-                    st.write(
-                        "Calling get_cached_project_by_label(",
-                        token,
-                        ",",
-                        st.session_state.project,
-                        ")",
+            if selected_projects:
+                if len(selected_projects) == 1:
+                    st.session_state["project"] = selected_projects[0]
+                else:
+                    st.sidebar.selectbox(
+                        project_selector_title, selected_projects, key="project"
                     )
-                project = get_cached_project_by_label(
-                    token, st.session_state.project, debug=debug
-                )
-                if project:
-                    if sample_doc and project is not None:
-                        if debug:
-                            st.write(
-                                "Calling get_cached_sample_doc(",
-                                token,
-                                ",",
-                                project.name,
-                                ")",
-                            )
-                        sample = get_cached_sample_doc(token, project.name, debug=debug)
+                if st.session_state.get("project", None) is not None:
                     if debug:
                         st.write(
-                            "Calling get_cached_annotators(",
+                            "Calling get_cached_project_by_label(",
                             token,
                             ",",
-                            project.name,
-                            ",",
-                            tuple(annotator_types)
-                            if annotator_types is not None
-                            else None,
-                            ",",
-                            favorite_only,
+                            st.session_state.project,
                             ")",
                         )
-                    all_annotators = (
-                        get_cached_annotators(
-                            token,
-                            project.name,
-                            tuple(annotator_types)
-                            if annotator_types is not None
-                            else None,
-                            favorite_only,
-                            debug=debug,
-                        )
-                        if project is not None
-                        else []
+                    project = get_cached_project_by_label(
+                        token, st.session_state.project, debug=debug
                     )
-                    selected_annotators = sorted(
-                        [
-                            p.label
-                            for p in all_annotators
-                            if annotators is None or p.name in annotators
-                        ]
-                    )
-                    st.sidebar.selectbox(
-                        annotator_selector_title, selected_annotators, key="annotator"
-                    )
-                    if st.session_state.get("annotator", None) is not None:
+                    if project:
+                        if sample_doc and project is not None:
+                            if debug:
+                                st.write(
+                                    "Calling get_cached_sample_doc(",
+                                    token,
+                                    ",",
+                                    project.name,
+                                    ")",
+                                )
+                            sample = get_cached_sample_doc(token, project.name, debug=debug)
                         if debug:
                             st.write(
-                                "Calling get_cached_annotator_by_label(",
+                                "Calling get_cached_annotators(",
                                 token,
                                 ",",
                                 project.name,
-                                ",",
-                                st.session_state.annotator,
                                 ",",
                                 tuple(annotator_types)
                                 if annotator_types is not None
@@ -194,16 +158,56 @@ def visualize(  # noqa: C901
                                 favorite_only,
                                 ")",
                             )
-                        annotator = get_cached_annotator_by_label(
-                            token,
-                            project.name,
-                            st.session_state.annotator,
-                            tuple(annotator_types)
-                            if annotator_types is not None
-                            else None,
-                            favorite_only,
-                            debug=debug,
+                        all_annotators = (
+                            get_cached_annotators(
+                                token,
+                                project.name,
+                                tuple(annotator_types)
+                                if annotator_types is not None
+                                else None,
+                                favorite_only,
+                                debug=debug,
+                            )
+                            if project is not None
+                            else []
                         )
+                        selected_annotators = sorted(
+                            [
+                                p.label
+                                for p in all_annotators
+                                if annotators is None or p.name in annotators
+                            ]
+                        )
+                        st.sidebar.selectbox(
+                            annotator_selector_title, selected_annotators, key="annotator"
+                        )
+                        if st.session_state.get("annotator", None) is not None:
+                            if debug:
+                                st.write(
+                                    "Calling get_cached_annotator_by_label(",
+                                    token,
+                                    ",",
+                                    project.name,
+                                    ",",
+                                    st.session_state.annotator,
+                                    ",",
+                                    tuple(annotator_types)
+                                    if annotator_types is not None
+                                    else None,
+                                    ",",
+                                    favorite_only,
+                                    ")",
+                                )
+                            annotator = get_cached_annotator_by_label(
+                                token,
+                                project.name,
+                                st.session_state.annotator,
+                                tuple(annotator_types)
+                                if annotator_types is not None
+                                else None,
+                                favorite_only,
+                                debug=debug,
+                            )
 
             if show_project or show_annotator:
                 (
