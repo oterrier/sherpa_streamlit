@@ -564,7 +564,10 @@ class StreamlitSherpaClient:
             project_status: ProjectStatus = r.parsed
             job_bean = self.wait_for_completion(project_status.pending_job)
             if project_status.status == "created" or self.is_success(job_bean):
-                yield project_status.project_name
+                return project_status.project_name
+            return None
+        else:
+            r.raise_for_status()
 
     def import_documents(self, project, datafile: UploadedFile, wait_for_completion: bool = False):
         multipart_data = LaunchDocumentImportMultipartData(
