@@ -22,6 +22,7 @@ from sherpa_client.api.jobs import get_job
 from sherpa_client.api.labels import get_labels
 from sherpa_client.api.plans import get_plan
 from sherpa_client.api.projects import get_projects, create_project
+from sherpa_client.api.shares import share_with_group, share_with_user
 from sherpa_client.client import SherpaClient
 from sherpa_client.models import (
     Credentials,
@@ -41,7 +42,7 @@ from sherpa_client.models import (
     ProjectConfigCreation,
     ProjectStatus,
     LaunchDocumentImportMultipartData, AnnotateBinaryForm, Converter, ConvertAnnotationPlan,
-    LaunchDocumentImportSegmentationPolicy,
+    LaunchDocumentImportSegmentationPolicy, ShareMode,
 )
 from sherpa_client.types import File, Unset, UNSET, Response
 from streamlit.uploaded_file_manager import UploadedFile
@@ -160,7 +161,7 @@ class StreamlitSherpaClient:
     register = {}
 
     def __init__(
-        self, server: str, user: str, password: str, use_token=True, **kawargs
+            self, server: str, user: str, password: str, use_token=True, **kawargs
     ):
         url = server[0:-1] if server.endswith("/") else server
         self.client = SherpaClient(base_url=f"{url}/api", verify_ssl=False, timeout=100)
@@ -179,8 +180,8 @@ class StreamlitSherpaClient:
         if self.use_token:
             return self.client.token
         elif (
-            self.client.session_cookies is not None
-            and "vertx-web.session" in self.client.session_cookies
+                self.client.session_cookies is not None
+                and "vertx-web.session" in self.client.session_cookies
         ):
             return self.client.session_cookies["vertx-web.session"]
         return None
@@ -248,10 +249,10 @@ class StreamlitSherpaClient:
 
     @lru_cache()
     def get_annotators(
-        self,
-        project: Union[str, ProjectBean],
-        annotator_types: Tuple[str] = None,
-        favorite_only: bool = False,
+            self,
+            project: Union[str, ProjectBean],
+            annotator_types: Tuple[str] = None,
+            favorite_only: bool = False,
     ) -> List[ExtendedAnnotator]:
         pname = project.name if isinstance(project, ProjectBean) else project
         # st.write("get_annotators(", project, ", ", annotator_types,", ", favorite_only, ")")
@@ -275,8 +276,8 @@ class StreamlitSherpaClient:
                                     for step in definition.pipeline:
                                         # st.write("get_annotator_by_label(", server, ", ", project, ", ", label, "): step=", str(step))
                                         if (
-                                            isinstance(step, WithAnnotator)
-                                            and step.project_name != project
+                                                isinstance(step, WithAnnotator)
+                                                and step.project_name != project
                                         ):
                                             step_labels = self.get_labels(
                                                 step.project_name
@@ -307,11 +308,11 @@ class StreamlitSherpaClient:
 
     @lru_cache()
     def get_annotator_by_label(
-        self,
-        project: Union[str, ProjectBean],
-        label: str,
-        annotator_types: Tuple[str] = None,
-        favorite_only: bool = False,
+            self,
+            project: Union[str, ProjectBean],
+            label: str,
+            annotator_types: Tuple[str] = None,
+            favorite_only: bool = False,
     ) -> ExtendedAnnotator:
         pname = project.name if isinstance(project, ProjectBean) else project
         annotators = self.get_annotators(pname, annotator_types, favorite_only)
@@ -322,7 +323,7 @@ class StreamlitSherpaClient:
 
     @lru_cache()
     def _get_plan(
-        self, project: Union[str, ProjectBean], name: str
+            self, project: Union[str, ProjectBean], name: str
     ) -> NamedAnnotationPlan:
         pname = project.name if isinstance(project, ProjectBean) else project
         r = get_plan.sync_detailed(pname, name, client=self.client)
@@ -332,10 +333,10 @@ class StreamlitSherpaClient:
             r.raise_for_status()
 
     def annotate_text(
-        self,
-        project: Union[str, ProjectBean],
-        annotator: Union[str, ExtendedAnnotator],
-        text: str,
+            self,
+            project: Union[str, ProjectBean],
+            annotator: Union[str, ExtendedAnnotator],
+            text: str,
     ) -> AnnotatedDocument:
         pname = project.name if isinstance(project, ProjectBean) else project
         aname = (
@@ -368,10 +369,10 @@ class StreamlitSherpaClient:
         return file
 
     def annotate_format_text(
-        self,
-        project: Union[str, ProjectBean],
-        annotator: Union[str, ExtendedAnnotator],
-        text: str,
+            self,
+            project: Union[str, ProjectBean],
+            annotator: Union[str, ExtendedAnnotator],
+            text: str,
     ) -> File:
         pname = project.name if isinstance(project, ProjectBean) else project
         aname = (
@@ -390,10 +391,10 @@ class StreamlitSherpaClient:
             r.raise_for_status()
 
     def annotate_binary(
-        self,
-        project: Union[str, ProjectBean],
-        annotator: Union[str, ExtendedAnnotator],
-        datafile: UploadedFile,
+            self,
+            project: Union[str, ProjectBean],
+            annotator: Union[str, ExtendedAnnotator],
+            datafile: UploadedFile,
     ) -> List[AnnotatedDocument]:
         pname = project.name if isinstance(project, ProjectBean) else project
         aname = (
@@ -417,10 +418,10 @@ class StreamlitSherpaClient:
         return docs
 
     def annotate_format_binary(
-        self,
-        project: Union[str, ProjectBean],
-        annotator: Union[str, ExtendedAnnotator],
-        datafile: UploadedFile,
+            self,
+            project: Union[str, ProjectBean],
+            annotator: Union[str, ExtendedAnnotator],
+            datafile: UploadedFile,
     ) -> File:
         pname = project.name if isinstance(project, ProjectBean) else project
         aname = (
@@ -443,10 +444,10 @@ class StreamlitSherpaClient:
             r.raise_for_status()
 
     def convert_binary(
-        self,
-        converter: str,
-        parameters: dict,
-        datafile: UploadedFile,
+            self,
+            converter: str,
+            parameters: dict,
+            datafile: UploadedFile,
     ) -> List[AnnotatedDocument]:
 
         plan = ConvertAnnotationPlan.from_dict({
@@ -501,10 +502,10 @@ class StreamlitSherpaClient:
         return documents
 
     def annotate_json(
-        self,
-        project: Union[str, ProjectBean],
-        annotator: Union[str, ExtendedAnnotator],
-        datafile: UploadedFile,
+            self,
+            project: Union[str, ProjectBean],
+            annotator: Union[str, ExtendedAnnotator],
+            datafile: UploadedFile,
     ) -> List[AnnotatedDocument]:
         pname = project.name if isinstance(project, ProjectBean) else project
         aname = (
@@ -524,10 +525,10 @@ class StreamlitSherpaClient:
         return docs
 
     def annotate_format_json(
-        self,
-        project: Union[str, ProjectBean],
-        annotator: Union[str, ExtendedAnnotator],
-        datafile: UploadedFile,
+            self,
+            project: Union[str, ProjectBean],
+            annotator: Union[str, ExtendedAnnotator],
+            datafile: UploadedFile,
     ) -> File:
         pname = project.name if isinstance(project, ProjectBean) else project
         aname = (
@@ -546,11 +547,11 @@ class StreamlitSherpaClient:
             r.raise_for_status()
 
     def create_project(
-        self,
-        label: str,
-        prefix: str = "test",
-        description: str = None,
-        nature: str = "sequence_labelling",
+            self,
+            label: str,
+            prefix: str = "test",
+            description: str = None,
+            nature: str = "sequence_labelling",
     ):
         shortuuid.set_alphabet("123456789abcdefghijkmnopqrstuvwxyz_")
         pname = f"{prefix}_" + shortuuid.uuid()[: (16 - len(prefix))]
@@ -570,6 +571,32 @@ class StreamlitSherpaClient:
         else:
             r.raise_for_status()
 
+    def share_project(
+            self,
+            project: Union[str, ProjectBean],
+            group: str = None,
+            user: str = None
+    ):
+        pname = project.name if isinstance(project, ProjectBean) else project
+        if group:
+            r = share_with_group.sync_detailed(
+                pname,
+                client=self.client,
+                json_body=ShareMode(read=True, write=True),
+                group_name=group
+            )
+        elif user:
+            r = share_with_user.sync_detailed(
+                pname,
+                client=self.client,
+                json_body=ShareMode(read=True, write=True),
+                username=user
+            )
+        else:
+            raise ValueError("Group or user name must be defined")
+        if not r.is_success:
+            r.raise_for_status()
+
     def import_documents(self, project, datafile: UploadedFile,
                          ignore_labelling=False,
                          segmentation_policy="compute_if_missing",
@@ -584,9 +611,9 @@ class StreamlitSherpaClient:
         )
         r = launch_document_import.sync_detailed(
             project, client=self.client, multipart_data=multipart_data,
-            ignore_labelling= ignore_labelling,
+            ignore_labelling=ignore_labelling,
             segmentation_policy=LaunchDocumentImportSegmentationPolicy(segmentation_policy),
-            split_corpus= split_corpus
+            split_corpus=split_corpus
         )
         if r.is_success:
             job_bean: SherpaJobBean = r.parsed
@@ -597,11 +624,11 @@ class StreamlitSherpaClient:
             r.raise_for_status()
 
     def annotate_corpus(
-        self,
-        project: Union[str, ProjectBean],
-        annotator: Union[str, ExtendedAnnotator],
-        annotator_project: Union[str, ProjectBean],
-        wait_for_completion: bool = False
+            self,
+            project: Union[str, ProjectBean],
+            annotator: Union[str, ExtendedAnnotator],
+            annotator_project: Union[str, ProjectBean],
+            wait_for_completion: bool = False
     ):
         pname = project.name if isinstance(project, ProjectBean) else project
         apname = (
@@ -639,7 +666,6 @@ class StreamlitSherpaClient:
                     job_bean.project, job_bean.id, client=self.client
                 )
         return job_bean
-
 
 # def main():
 #     url_input = "https://sherpa-sandbox.kairntech.com/"
