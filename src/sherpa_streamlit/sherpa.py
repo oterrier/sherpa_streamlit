@@ -628,6 +628,7 @@ class StreamlitSherpaClient:
             project: Union[str, ProjectBean],
             annotator: Union[str, ExtendedAnnotator],
             annotator_project: Union[str, ProjectBean],
+            email_notification: bool = False,
             wait_for_completion: bool = False
     ):
         pname = project.name if isinstance(project, ProjectBean) else project
@@ -640,7 +641,7 @@ class StreamlitSherpaClient:
             annotator.name if isinstance(annotator, ExtendedAnnotator) else annotator
         )
         r = annotate_corpus_with.sync_detailed(
-            pname, aname, client=self.client, annotator_project=apname
+            pname, aname, client=self.client, annotator_project=apname, email_notification=email_notification
         )
         if r.is_success:
             job_bean: SherpaJobBean = r.parsed
