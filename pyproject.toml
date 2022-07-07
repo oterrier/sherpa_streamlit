@@ -26,7 +26,7 @@ classifiers = [
 requires = [
     "pandas==1.2.3",
     "openpyxl==3.0.7",
-    "streamlit~=1.2.0",
+    "streamlit==1.10.0",
     "st-annotated-text>=3.0.0",
     "sherpa-client>=0.10.5",
     "collections-extended>=1.0.2",
